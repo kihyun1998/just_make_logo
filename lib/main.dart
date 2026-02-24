@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_dropdown_button/flutter_dropdown_button.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 void main() {
   runApp(const MyApp());
@@ -37,17 +37,21 @@ class LogoPage extends StatefulWidget {
 }
 
 class _LogoPageState extends State<LogoPage> {
-  final TextEditingController _controller =
-      TextEditingController(text: 'HELLO');
-  final TextEditingController _widthController =
-      TextEditingController(text: '512');
-  final TextEditingController _heightController =
-      TextEditingController(text: '512');
+  final TextEditingController _controller = TextEditingController(
+    text: 'HELLO',
+  );
+  final TextEditingController _widthController = TextEditingController(
+    text: '512',
+  );
+  final TextEditingController _heightController = TextEditingController(
+    text: '512',
+  );
 
   String _selectedFont = 'Workbench';
   Color _backgroundColor = Colors.white;
   Color _textColor = Colors.black;
   String _selectedSize = '512 x 512';
+  double _fontScale = 1.0;
 
   static const List<String> _fonts = ['Workbench', 'Jersey 20', 'Noto Serif'];
 
@@ -100,7 +104,10 @@ class _LogoPageState extends State<LogoPage> {
   }
 
   Widget _buildColorPicker(
-      String label, Color selected, ValueChanged<Color> onSelect) {
+    String label,
+    Color selected,
+    ValueChanged<Color> onSelect,
+  ) {
     return Row(
       children: [
         SizedBox(width: 80, child: Text(label)),
@@ -177,8 +184,9 @@ class _LogoPageState extends State<LogoPage> {
                       setState(() {
                         _selectedSize = value;
                         if (!_isCustomSize) {
-                          final preset = _sizePresets
-                              .firstWhere((p) => p.label == value);
+                          final preset = _sizePresets.firstWhere(
+                            (p) => p.label == value,
+                          );
                           _widthController.text = preset.width.toString();
                           _heightController.text = preset.height.toString();
                         }
@@ -225,12 +233,55 @@ class _LogoPageState extends State<LogoPage> {
             ),
             const SizedBox(height: 12),
 
+            // Font scale
+            Row(
+              children: [
+                const SizedBox(width: 80, child: Text('Font Size')),
+                IconButton(
+                  icon: const Icon(Icons.remove),
+                  onPressed: _fontScale > 0.5
+                      ? () => setState(() => _fontScale = (_fontScale - 0.1).clamp(0.5, 3.0))
+                      : null,
+                ),
+                Expanded(
+                  child: Slider(
+                    value: _fontScale,
+                    min: 0.5,
+                    max: 3.0,
+                    divisions: 25,
+                    label: '${(_fontScale * 100).round()}%',
+                    onChanged: (v) => setState(() => _fontScale = v),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.add),
+                  onPressed: _fontScale < 3.0
+                      ? () => setState(() => _fontScale = (_fontScale + 0.1).clamp(0.5, 3.0))
+                      : null,
+                ),
+                SizedBox(
+                  width: 48,
+                  child: Text(
+                    '${(_fontScale * 100).round()}%',
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+
             // Theme colors
-            _buildColorPicker('Background', _backgroundColor,
-                (c) => setState(() => _backgroundColor = c)),
+            _buildColorPicker(
+              'Background',
+              _backgroundColor,
+              (c) => setState(() => _backgroundColor = c),
+            ),
             const SizedBox(height: 8),
             _buildColorPicker(
-                'Text', _textColor, (c) => setState(() => _textColor = c)),
+              'Text',
+              _textColor,
+              (c) => setState(() => _textColor = c),
+            ),
             const SizedBox(height: 16),
 
             // Size indicator
@@ -255,10 +306,11 @@ class _LogoPageState extends State<LogoPage> {
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(8),
                       child: Center(
-                        child: FittedBox(
-                          fit: BoxFit.contain,
-                          child: Padding(
-                            padding: const EdgeInsets.all(24.0),
+                        child: FractionallySizedBox(
+                          widthFactor: (_fontScale * 0.33).clamp(0.1, 1.0),
+                          heightFactor: (_fontScale * 0.33).clamp(0.1, 1.0),
+                          child: FittedBox(
+                            fit: BoxFit.contain,
                             child: Text(
                               _controller.text,
                               style: _getFontStyle(120),
