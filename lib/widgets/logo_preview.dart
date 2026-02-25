@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../theme/tweakcn_theme.g.dart';
+
 class LogoPreview extends StatelessWidget {
   final String text;
   final TextStyle textStyle;
@@ -18,17 +20,22 @@ class LogoPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.tweakcnColors;
+    final radius = context.tweakcnRadius;
+    final shadows = context.tweakcnShadows;
+
     return Center(
       child: AspectRatio(
         aspectRatio: aspectRatio,
         child: Container(
           decoration: BoxDecoration(
             color: backgroundColor,
-            border: Border.all(color: Colors.grey.shade300),
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(radius.lg),
+            border: Border.all(color: colors.border),
+            boxShadow: shadows.shadowMd,
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(radius.lg),
             child: Center(
               child: FractionallySizedBox(
                 widthFactor: (fontScale * 0.33).clamp(0.1, 1.0),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'pages/logo_page.dart';
+import 'theme/tweakcn_theme.g.dart';
 
 void main() {
   runApp(const MyApp());
@@ -13,9 +14,10 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Logo Generator',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-      ),
+      debugShowCheckedModeBanner: false,
+      theme: TweakcnTheme.light,
+      darkTheme: TweakcnTheme.dark,
+      themeMode: ThemeMode.dark,
       home: const LogoPage(),
     );
   }
