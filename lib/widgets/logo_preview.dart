@@ -8,6 +8,7 @@ class LogoPreview extends StatelessWidget {
   final Color backgroundColor;
   final double fontScale;
   final double aspectRatio;
+  final GlobalKey? repaintBoundaryKey;
 
   const LogoPreview({
     super.key,
@@ -16,6 +17,7 @@ class LogoPreview extends StatelessWidget {
     required this.backgroundColor,
     required this.fontScale,
     required this.aspectRatio,
+    this.repaintBoundaryKey,
   });
 
   @override
@@ -29,23 +31,28 @@ class LogoPreview extends StatelessWidget {
         aspectRatio: aspectRatio,
         child: Container(
           decoration: BoxDecoration(
-            color: backgroundColor,
             borderRadius: BorderRadius.circular(radius.lg),
             border: Border.all(color: colors.border),
             boxShadow: shadows.shadowMd,
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(radius.lg),
-            child: Center(
-              child: FractionallySizedBox(
-                widthFactor: (fontScale * 0.33).clamp(0.1, 1.0),
-                heightFactor: (fontScale * 0.33).clamp(0.1, 1.0),
-                child: FittedBox(
-                  fit: BoxFit.contain,
-                  child: Text(
-                    text,
-                    style: textStyle,
-                    textAlign: TextAlign.center,
+            child: RepaintBoundary(
+              key: repaintBoundaryKey,
+              child: Container(
+                color: backgroundColor,
+                child: Center(
+                  child: FractionallySizedBox(
+                    widthFactor: (fontScale * 0.33).clamp(0.1, 1.0),
+                    heightFactor: (fontScale * 0.33).clamp(0.1, 1.0),
+                    child: FittedBox(
+                      fit: BoxFit.contain,
+                      child: Text(
+                        text,
+                        style: textStyle,
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
                   ),
                 ),
               ),

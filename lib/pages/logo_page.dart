@@ -4,6 +4,8 @@ import 'package:flutter_dropdown_button/flutter_dropdown_button.dart';
 
 import '../constants/logo_constants.dart';
 import '../theme/tweakcn_theme.g.dart';
+import '../utils/export_utils.dart';
+import '../utils/font_installer.dart';
 import '../utils/font_utils.dart';
 import '../widgets/color_picker.dart';
 import '../widgets/font_scale_control.dart';
@@ -34,12 +36,18 @@ class _LogoPageState extends State<LogoPage> {
     text: '512',
   );
 
+  final GlobalKey _repaintBoundaryKey = GlobalKey();
+
   String _selectedFont = 'Workbench';
   Color _backgroundColor = Colors.white;
   Color _textColor = Colors.black;
   String _selectedSize = '512 x 512';
   double _fontScale = 1.0;
   int _maxLines = 1;
+
+  ExportFormat _exportFormat = ExportFormat.png;
+  int _exportScale = 1;
+  bool _isExporting = false;
 
   bool get _isCustomSize => _selectedSize == 'Custom';
 
@@ -152,6 +160,7 @@ class _LogoPageState extends State<LogoPage> {
               backgroundColor: _backgroundColor,
               fontScale: _fontScale,
               aspectRatio: aspectRatio,
+              repaintBoundaryKey: _repaintBoundaryKey,
             ),
           ),
         ],
@@ -234,16 +243,43 @@ class _LogoPageState extends State<LogoPage> {
 
             // Font
             _buildSectionLabel('FONT', Icons.font_download_outlined),
-            TextOnlyDropdownButton(
-              items: LogoConstants.fonts,
-              value: _selectedFont,
-              hint: 'Font',
-              width: double.infinity,
-              onChanged: (value) {
-                if (value != null) {
-                  setState(() => _selectedFont = value);
-                }
-              },
+            Row(
+              children: [
+                Expanded(
+                  child: TextOnlyDropdownButton(
+                    items: LogoConstants.fonts,
+                    value: _selectedFont,
+                    hint: 'Font',
+                    width: double.infinity,
+                    onChanged: (value) {
+                      if (value != null) {
+                        setState(() => _selectedFont = value);
+                      }
+                    },
+                  ),
+                ),
+                const SizedBox(width: 6),
+                SizedBox(
+                  width: 36,
+                  height: 36,
+                  child: IconButton(
+                    onPressed: _handleFontInstall,
+                    icon: Icon(
+                      Icons.open_in_new,
+                      size: 16,
+                      color: colors.mutedForeground,
+                    ),
+                    tooltip: 'Download font from Google Fonts',
+                    padding: EdgeInsets.zero,
+                    style: IconButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(radius.sm),
+                        side: BorderSide(color: colors.border),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
 
             _buildDivider(),
@@ -337,6 +373,119 @@ class _LogoPageState extends State<LogoPage> {
               colors: LogoConstants.colors,
               onSelect: (c) => setState(() => _textColor = c),
             ),
+
+            _buildDivider(),
+
+            // Export
+            _buildSectionLabel('EXPORT', Icons.download_outlined),
+            // Format selector
+            Row(
+              children: [
+                Text(
+                  'Format',
+                  style: TextStyle(
+                    color: colors.mutedForeground,
+                    fontSize: 12,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                _buildOptionChip(
+                  'PNG',
+                  isSelected: _exportFormat == ExportFormat.png,
+                  onTap: () =>
+                      setState(() => _exportFormat = ExportFormat.png),
+                ),
+                _buildOptionChip(
+                  'JPG',
+                  isSelected: _exportFormat == ExportFormat.jpg,
+                  onTap: () =>
+                      setState(() => _exportFormat = ExportFormat.jpg),
+                ),
+                _buildOptionChip(
+                  'SVG',
+                  isSelected: _exportFormat == ExportFormat.svg,
+                  onTap: () => setState(() {
+                    _exportFormat = ExportFormat.svg;
+                    _exportScale = 1;
+                  }),
+                ),
+              ],
+            ),
+            // Scale selector (raster only)
+            if (_exportFormat != ExportFormat.svg) ...[
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Text(
+                    'Scale',
+                    style: TextStyle(
+                      color: colors.mutedForeground,
+                      fontSize: 12,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  for (final s in [1, 2, 3, 4])
+                    _buildOptionChip(
+                      'x$s',
+                      isSelected: _exportScale == s,
+                      onTap: () => setState(() => _exportScale = s),
+                    ),
+                ],
+              ),
+            ],
+            // Output dimensions
+            const SizedBox(height: 8),
+            Container(
+              padding:
+                  const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+              decoration: BoxDecoration(
+                color: colors.muted,
+                borderRadius: BorderRadius.circular(radius.sm),
+              ),
+              child: Text(
+                _exportFormat == ExportFormat.svg
+                    ? '$_logoWidth x $_logoHeight (vector)'
+                    : '${_logoWidth * _exportScale} x ${_logoHeight * _exportScale} px',
+                style: TextStyle(
+                  color: colors.mutedForeground,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+            // Export button
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: _isExporting ? null : _handleExport,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: colors.primary,
+                  foregroundColor: colors.primaryForeground,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(radius.md),
+                  ),
+                ),
+                icon: _isExporting
+                    ? SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: colors.primaryForeground,
+                        ),
+                      )
+                    : const Icon(Icons.download, size: 18),
+                label: Text(
+                  _isExporting ? 'Exporting...' : 'Export',
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -348,6 +497,85 @@ class _LogoPageState extends State<LogoPage> {
       padding: const EdgeInsets.symmetric(vertical: 12),
       child: Divider(height: 1, color: context.tweakcnColors.border),
     );
+  }
+
+  Widget _buildOptionChip(
+    String label, {
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    final colors = context.tweakcnColors;
+    final radius = context.tweakcnRadius;
+    return Padding(
+      padding: const EdgeInsets.only(right: 4),
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          decoration: BoxDecoration(
+            color: isSelected ? colors.primary : Colors.transparent,
+            borderRadius: BorderRadius.circular(radius.sm),
+            border: isSelected ? null : Border.all(color: colors.border),
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              color: isSelected
+                  ? colors.primaryForeground
+                  : colors.mutedForeground,
+              fontSize: 12,
+              fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _handleFontInstall() async {
+    await FontInstaller.openGoogleFontsPage(_selectedFont);
+  }
+
+  Future<void> _handleExport() async {
+    if (_isExporting) return;
+    setState(() => _isExporting = true);
+
+    try {
+      final success = await ExportUtils.export(
+        repaintKey: _repaintBoundaryKey,
+        format: _exportFormat,
+        targetWidth: _logoWidth,
+        targetHeight: _logoHeight,
+        scale: _exportFormat == ExportFormat.svg ? 1 : _exportScale,
+        text: _controller.text,
+        backgroundColor: _backgroundColor,
+        textColor: _textColor,
+        fontFamily: _selectedFont,
+        fontScale: _fontScale,
+      );
+
+      if (mounted) {
+        if (success) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Exported successfully!'),
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Export failed: $e'),
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isExporting = false);
+    }
   }
 
   @override
