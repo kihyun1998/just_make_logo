@@ -10,7 +10,14 @@ import '../widgets/font_scale_control.dart';
 import '../widgets/logo_preview.dart';
 
 class LogoPage extends StatefulWidget {
-  const LogoPage({super.key});
+  final bool isDark;
+  final VoidCallback onToggleTheme;
+
+  const LogoPage({
+    super.key,
+    required this.isDark,
+    required this.onToggleTheme,
+  });
 
   @override
   State<LogoPage> createState() => _LogoPageState();
@@ -377,6 +384,18 @@ class _LogoPageState extends State<LogoPage> {
             ),
           ],
         ),
+        actions: [
+          IconButton(
+            onPressed: widget.onToggleTheme,
+            icon: Icon(
+              widget.isDark ? Icons.light_mode_outlined : Icons.dark_mode_outlined,
+              color: colors.foreground,
+              size: 20,
+            ),
+            tooltip: widget.isDark ? 'Light mode' : 'Dark mode',
+          ),
+          const SizedBox(width: 4),
+        ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
           child: Container(height: 1, color: colors.border),
