@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dropdown_button/flutter_dropdown_button.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../constants/logo_constants.dart';
+import '../providers/logo_provider.dart';
+import '../providers/theme_provider.dart';
 import '../theme/tweakcn_theme.g.dart';
 import '../utils/export_utils.dart';
 import '../utils/font_installer.dart';
@@ -11,21 +14,14 @@ import '../widgets/color_picker.dart';
 import '../widgets/font_scale_control.dart';
 import '../widgets/logo_preview.dart';
 
-class LogoPage extends StatefulWidget {
-  final bool isDark;
-  final VoidCallback onToggleTheme;
-
-  const LogoPage({
-    super.key,
-    required this.isDark,
-    required this.onToggleTheme,
-  });
+class LogoPage extends ConsumerStatefulWidget {
+  const LogoPage({super.key});
 
   @override
-  State<LogoPage> createState() => _LogoPageState();
+  ConsumerState<LogoPage> createState() => _LogoPageState();
 }
 
-class _LogoPageState extends State<LogoPage> {
+class _LogoPageState extends ConsumerState<LogoPage> {
   final TextEditingController _controller = TextEditingController(
     text: 'HELLO',
   );
@@ -38,30 +34,22 @@ class _LogoPageState extends State<LogoPage> {
 
   final GlobalKey _repaintBoundaryKey = GlobalKey();
 
-  String _selectedFont = 'Workbench';
-  Color _backgroundColor = Colors.white;
-  Color _textColor = Colors.black;
-  String _selectedSize = '512 x 512';
-  double _fontScale = 1.0;
-  int _maxLines = 1;
-
-  ExportFormat _exportFormat = ExportFormat.png;
-  int _exportScale = 1;
-  bool _isExporting = false;
-
-  bool get _isCustomSize => _selectedSize == 'Custom';
+  bool get _isCustomSize =>
+      ref.read(logoNotifierProvider).selectedSize == 'Custom';
 
   int get _logoWidth {
     if (_isCustomSize) return int.tryParse(_widthController.text) ?? 512;
+    final selectedSize = ref.read(logoNotifierProvider).selectedSize;
     return LogoConstants.sizePresets
-        .firstWhere((p) => p.label == _selectedSize)
+        .firstWhere((p) => p.label == selectedSize)
         .width;
   }
 
   int get _logoHeight {
     if (_isCustomSize) return int.tryParse(_heightController.text) ?? 512;
+    final selectedSize = ref.read(logoNotifierProvider).selectedSize;
     return LogoConstants.sizePresets
-        .firstWhere((p) => p.label == _selectedSize)
+        .firstWhere((p) => p.label == selectedSize)
         .height;
   }
 
@@ -121,6 +109,7 @@ class _LogoPageState extends State<LogoPage> {
   }
 
   Widget _buildPreviewPanel() {
+    final logo = ref.watch(logoNotifierProvider);
     final aspectRatio = _logoWidth / _logoHeight;
     final colors = context.tweakcnColors;
     final radius = context.tweakcnRadius;
@@ -156,9 +145,9 @@ class _LogoPageState extends State<LogoPage> {
           Expanded(
             child: LogoPreview(
               text: _controller.text,
-              textStyle: getFontStyle(_selectedFont, 120, _textColor),
-              backgroundColor: _backgroundColor,
-              fontScale: _fontScale,
+              textStyle: getFontStyle(logo.selectedFont, 120, logo.textColor),
+              backgroundColor: logo.backgroundColor,
+              fontScale: logo.fontScale,
               aspectRatio: aspectRatio,
               repaintBoundaryKey: _repaintBoundaryKey,
             ),
@@ -169,6 +158,8 @@ class _LogoPageState extends State<LogoPage> {
   }
 
   Widget _buildControlPanel() {
+    final logo = ref.watch(logoNotifierProvider);
+    final notifier = ref.read(logoNotifierProvider.notifier);
     final colors = context.tweakcnColors;
     final radius = context.tweakcnRadius;
 
@@ -189,7 +180,7 @@ class _LogoPageState extends State<LogoPage> {
               controller: _controller,
               style: TextStyle(color: colors.foreground, fontSize: 15),
               decoration: _inputDecoration('Enter text'),
-              maxLines: _maxLines,
+              maxLines: logo.maxLines,
               onChanged: (_) => setState(() {}),
             ),
             const SizedBox(height: 6),
@@ -202,11 +193,11 @@ class _LogoPageState extends State<LogoPage> {
                 const SizedBox(width: 8),
                 ...List.generate(3, (i) {
                   final n = i + 1;
-                  final isSelected = _maxLines == n;
+                  final isSelected = logo.maxLines == n;
                   return Padding(
                     padding: const EdgeInsets.only(right: 4),
                     child: GestureDetector(
-                      onTap: () => setState(() => _maxLines = n),
+                      onTap: () => notifier.setMaxLines(n),
                       child: Container(
                         width: 28,
                         height: 28,
@@ -248,12 +239,12 @@ class _LogoPageState extends State<LogoPage> {
                 Expanded(
                   child: TextOnlyDropdownButton(
                     items: LogoConstants.fonts,
-                    value: _selectedFont,
+                    value: logo.selectedFont,
                     hint: 'Font',
                     width: double.infinity,
                     onChanged: (value) {
                       if (value != null) {
-                        setState(() => _selectedFont = value);
+                        notifier.setFont(value);
                       }
                     },
                   ),
@@ -289,22 +280,20 @@ class _LogoPageState extends State<LogoPage> {
             TextOnlyDropdownButton(
               items:
                   LogoConstants.sizePresets.map((p) => p.label).toList(),
-              value: _selectedSize,
+              value: logo.selectedSize,
               hint: 'Size',
               width: double.infinity,
               onChanged: (value) {
                 if (value != null) {
-                  setState(() {
-                    _selectedSize = value;
-                    if (!_isCustomSize) {
-                      final preset =
-                          LogoConstants.sizePresets.firstWhere(
-                        (p) => p.label == value,
-                      );
-                      _widthController.text = preset.width.toString();
-                      _heightController.text = preset.height.toString();
-                    }
-                  });
+                  notifier.setSelectedSize(value);
+                  if (value != 'Custom') {
+                    final preset =
+                        LogoConstants.sizePresets.firstWhere(
+                      (p) => p.label == value,
+                    );
+                    _widthController.text = preset.width.toString();
+                    _heightController.text = preset.height.toString();
+                  }
                 }
               },
             ),
@@ -352,8 +341,8 @@ class _LogoPageState extends State<LogoPage> {
             // Font scale
             _buildSectionLabel('SCALE', Icons.zoom_in),
             FontScaleControl(
-              fontScale: _fontScale,
-              onChanged: (v) => setState(() => _fontScale = v),
+              fontScale: logo.fontScale,
+              onChanged: (v) => notifier.setFontScale(v),
             ),
 
             _buildDivider(),
@@ -362,16 +351,16 @@ class _LogoPageState extends State<LogoPage> {
             _buildSectionLabel('COLORS', Icons.palette_outlined),
             ColorPicker(
               label: 'BG',
-              selected: _backgroundColor,
+              selected: logo.backgroundColor,
               colors: LogoConstants.colors,
-              onSelect: (c) => setState(() => _backgroundColor = c),
+              onSelect: (c) => notifier.setBackgroundColor(c),
             ),
             const SizedBox(height: 8),
             ColorPicker(
               label: 'Text',
-              selected: _textColor,
+              selected: logo.textColor,
               colors: LogoConstants.colors,
-              onSelect: (c) => setState(() => _textColor = c),
+              onSelect: (c) => notifier.setTextColor(c),
             ),
 
             _buildDivider(),
@@ -391,28 +380,23 @@ class _LogoPageState extends State<LogoPage> {
                 const SizedBox(width: 8),
                 _buildOptionChip(
                   'PNG',
-                  isSelected: _exportFormat == ExportFormat.png,
-                  onTap: () =>
-                      setState(() => _exportFormat = ExportFormat.png),
+                  isSelected: logo.exportFormat == ExportFormat.png,
+                  onTap: () => notifier.setExportFormat(ExportFormat.png),
                 ),
                 _buildOptionChip(
                   'JPG',
-                  isSelected: _exportFormat == ExportFormat.jpg,
-                  onTap: () =>
-                      setState(() => _exportFormat = ExportFormat.jpg),
+                  isSelected: logo.exportFormat == ExportFormat.jpg,
+                  onTap: () => notifier.setExportFormat(ExportFormat.jpg),
                 ),
                 _buildOptionChip(
                   'SVG',
-                  isSelected: _exportFormat == ExportFormat.svg,
-                  onTap: () => setState(() {
-                    _exportFormat = ExportFormat.svg;
-                    _exportScale = 1;
-                  }),
+                  isSelected: logo.exportFormat == ExportFormat.svg,
+                  onTap: () => notifier.setExportFormat(ExportFormat.svg),
                 ),
               ],
             ),
             // Scale selector (raster only)
-            if (_exportFormat != ExportFormat.svg) ...[
+            if (logo.exportFormat != ExportFormat.svg) ...[
               const SizedBox(height: 8),
               Row(
                 children: [
@@ -427,8 +411,8 @@ class _LogoPageState extends State<LogoPage> {
                   for (final s in [1, 2, 3, 4])
                     _buildOptionChip(
                       'x$s',
-                      isSelected: _exportScale == s,
-                      onTap: () => setState(() => _exportScale = s),
+                      isSelected: logo.exportScale == s,
+                      onTap: () => notifier.setExportScale(s),
                     ),
                 ],
               ),
@@ -443,9 +427,9 @@ class _LogoPageState extends State<LogoPage> {
                 borderRadius: BorderRadius.circular(radius.sm),
               ),
               child: Text(
-                _exportFormat == ExportFormat.svg
+                logo.exportFormat == ExportFormat.svg
                     ? '$_logoWidth x $_logoHeight (vector)'
-                    : '${_logoWidth * _exportScale} x ${_logoHeight * _exportScale} px',
+                    : '${_logoWidth * logo.exportScale} x ${_logoHeight * logo.exportScale} px',
                 style: TextStyle(
                   color: colors.mutedForeground,
                   fontSize: 11,
@@ -458,7 +442,7 @@ class _LogoPageState extends State<LogoPage> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
-                onPressed: _isExporting ? null : _handleExport,
+                onPressed: logo.isExporting ? null : _handleExport,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: colors.primary,
                   foregroundColor: colors.primaryForeground,
@@ -467,7 +451,7 @@ class _LogoPageState extends State<LogoPage> {
                     borderRadius: BorderRadius.circular(radius.md),
                   ),
                 ),
-                icon: _isExporting
+                icon: logo.isExporting
                     ? SizedBox(
                         width: 16,
                         height: 16,
@@ -478,7 +462,7 @@ class _LogoPageState extends State<LogoPage> {
                       )
                     : const Icon(Icons.download, size: 18),
                 label: Text(
-                  _isExporting ? 'Exporting...' : 'Export',
+                  logo.isExporting ? 'Exporting...' : 'Export',
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
@@ -533,25 +517,28 @@ class _LogoPageState extends State<LogoPage> {
   }
 
   Future<void> _handleFontInstall() async {
-    await FontInstaller.openGoogleFontsPage(_selectedFont);
+    final font = ref.read(logoNotifierProvider).selectedFont;
+    await FontInstaller.openGoogleFontsPage(font);
   }
 
   Future<void> _handleExport() async {
-    if (_isExporting) return;
-    setState(() => _isExporting = true);
+    final logo = ref.read(logoNotifierProvider);
+    final notifier = ref.read(logoNotifierProvider.notifier);
+    if (logo.isExporting) return;
+    notifier.setIsExporting(true);
 
     try {
       final success = await ExportUtils.export(
         repaintKey: _repaintBoundaryKey,
-        format: _exportFormat,
+        format: logo.exportFormat,
         targetWidth: _logoWidth,
         targetHeight: _logoHeight,
-        scale: _exportFormat == ExportFormat.svg ? 1 : _exportScale,
+        scale: logo.exportFormat == ExportFormat.svg ? 1 : logo.exportScale,
         text: _controller.text,
-        backgroundColor: _backgroundColor,
-        textColor: _textColor,
-        fontFamily: _selectedFont,
-        fontScale: _fontScale,
+        backgroundColor: logo.backgroundColor,
+        textColor: logo.textColor,
+        fontFamily: logo.selectedFont,
+        fontScale: logo.fontScale,
       );
 
       if (mounted) {
@@ -574,12 +561,13 @@ class _LogoPageState extends State<LogoPage> {
         );
       }
     } finally {
-      if (mounted) setState(() => _isExporting = false);
+      if (mounted) notifier.setIsExporting(false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final isDark = ref.watch(themeNotifierProvider) == ThemeMode.dark;
     final colors = context.tweakcnColors;
     final radius = context.tweakcnRadius;
 
@@ -614,13 +602,13 @@ class _LogoPageState extends State<LogoPage> {
         ),
         actions: [
           IconButton(
-            onPressed: widget.onToggleTheme,
+            onPressed: () => ref.read(themeNotifierProvider.notifier).toggleTheme(),
             icon: Icon(
-              widget.isDark ? Icons.light_mode_outlined : Icons.dark_mode_outlined,
+              isDark ? Icons.light_mode_outlined : Icons.dark_mode_outlined,
               color: colors.foreground,
               size: 20,
             ),
-            tooltip: widget.isDark ? 'Light mode' : 'Dark mode',
+            tooltip: isDark ? 'Light mode' : 'Dark mode',
           ),
           const SizedBox(width: 4),
         ],
