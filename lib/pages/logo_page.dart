@@ -31,6 +31,7 @@ class _LogoPageState extends State<LogoPage> {
   Color _textColor = Colors.black;
   String _selectedSize = '512 x 512';
   double _fontScale = 1.0;
+  int _maxLines = 1;
 
   bool get _isCustomSize => _selectedSize == 'Custom';
 
@@ -77,6 +78,7 @@ class _LogoPageState extends State<LogoPage> {
                 labelText: 'Enter text',
                 border: OutlineInputBorder(),
               ),
+              maxLines: _maxLines,
               onChanged: (_) => setState(() {}),
             ),
             const SizedBox(height: 12),
@@ -155,10 +157,36 @@ class _LogoPageState extends State<LogoPage> {
             ),
             const SizedBox(height: 12),
 
-            // Font scale
-            FontScaleControl(
-              fontScale: _fontScale,
-              onChanged: (v) => setState(() => _fontScale = v),
+            // Font scale + Max lines row
+            Row(
+              children: [
+                Expanded(
+                  child: FontScaleControl(
+                    fontScale: _fontScale,
+                    onChanged: (v) => setState(() => _fontScale = v),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text('Lines', style: Theme.of(context).textTheme.bodySmall),
+                    const SizedBox(width: 8),
+                    ...List.generate(3, (i) {
+                      final n = i + 1;
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 4),
+                        child: ChoiceChip(
+                          label: Text('$n'),
+                          selected: _maxLines == n,
+                          onSelected: (_) => setState(() => _maxLines = n),
+                          visualDensity: VisualDensity.compact,
+                        ),
+                      );
+                    }),
+                  ],
+                ),
+              ],
             ),
             const SizedBox(height: 12),
 

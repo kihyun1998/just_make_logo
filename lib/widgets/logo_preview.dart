@@ -35,7 +35,11 @@ class LogoPreview extends StatelessWidget {
                 heightFactor: (fontScale * 0.33).clamp(0.1, 1.0),
                 child: FittedBox(
                   fit: BoxFit.contain,
-                  child: Text(text, style: textStyle),
+                  child: Text(
+                    text,
+                    style: textStyle,
+                    textAlign: TextAlign.center,
+                  ),
                 ),
               ),
             ),
