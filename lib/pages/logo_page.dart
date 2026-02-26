@@ -11,6 +11,7 @@ import '../utils/export_utils.dart';
 import '../utils/font_installer.dart';
 import '../utils/font_utils.dart';
 import '../widgets/color_picker.dart';
+import '../widgets/color_preset_sheet.dart';
 import '../widgets/font_scale_control.dart';
 import '../widgets/logo_preview.dart';
 
@@ -363,6 +364,27 @@ class _LogoPageState extends ConsumerState<LogoPage> {
               onSelect: (c) => notifier.setTextColor(c),
             ),
 
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildActionButton(
+                    icon: Icons.save_outlined,
+                    label: 'Save',
+                    onTap: () => _showSavePresetDialog(),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _buildActionButton(
+                    icon: Icons.folder_open_outlined,
+                    label: 'Load (${logo.colorPresets.length})',
+                    onTap: () => _showLoadPresetSheet(),
+                  ),
+                ),
+              ],
+            ),
+
             _buildDivider(),
 
             // Export
@@ -512,6 +534,120 @@ class _LogoPageState extends ConsumerState<LogoPage> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildActionButton({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    final colors = context.tweakcnColors;
+    final radius = context.tweakcnRadius;
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(radius.sm),
+          border: Border.all(color: colors.border),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 14, color: colors.mutedForeground),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: TextStyle(
+                color: colors.mutedForeground,
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showSavePresetDialog() {
+    final controller = TextEditingController();
+    final colors = context.tweakcnColors;
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: colors.card,
+        title: Text(
+          'Save Color Preset',
+          style: TextStyle(color: colors.foreground, fontSize: 16),
+        ),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          style: TextStyle(color: colors.foreground),
+          decoration: InputDecoration(
+            hintText: 'Preset name',
+            hintStyle: TextStyle(color: colors.mutedForeground),
+            enabledBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: colors.border),
+            ),
+            focusedBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: colors.ring),
+            ),
+          ),
+          onSubmitted: (value) {
+            final name = value.trim();
+            if (name.isEmpty) return;
+            ref.read(logoNotifierProvider.notifier).saveColorPreset(name);
+            Navigator.pop(ctx);
+          },
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text('Cancel',
+                style: TextStyle(color: colors.mutedForeground)),
+          ),
+          TextButton(
+            onPressed: () {
+              final presets = ref.read(logoNotifierProvider).colorPresets;
+              final name = controller.text.trim().isEmpty
+                  ? 'Preset ${presets.length + 1}'
+                  : controller.text.trim();
+              ref.read(logoNotifierProvider.notifier).saveColorPreset(name);
+              Navigator.pop(ctx);
+            },
+            child:
+                Text('Save', style: TextStyle(color: colors.primary)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showLoadPresetSheet() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (_) => Consumer(
+        builder: (context, ref, _) {
+          final presets = ref.watch(logoNotifierProvider).colorPresets;
+          return ColorPresetSheet(
+            presets: presets,
+            onApply: (preset) {
+              ref.read(logoNotifierProvider.notifier).applyColorPreset(preset);
+            },
+            onDelete: (id) {
+              ref.read(logoNotifierProvider.notifier).deleteColorPreset(id);
+            },
+            onRename: (id, newName) {
+              ref.read(logoNotifierProvider.notifier).renameColorPreset(id, newName);
+            },
+          );
+        },
       ),
     );
   }

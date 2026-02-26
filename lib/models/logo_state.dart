@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../utils/export_utils.dart';
+import 'color_preset.dart';
 
 class LogoState {
   final String selectedFont;
@@ -12,6 +13,7 @@ class LogoState {
   final ExportFormat exportFormat;
   final int exportScale;
   final bool isExporting;
+  final List<ColorPreset> colorPresets;
 
   const LogoState({
     this.selectedFont = 'Workbench',
@@ -23,6 +25,7 @@ class LogoState {
     this.exportFormat = ExportFormat.png,
     this.exportScale = 1,
     this.isExporting = false,
+    this.colorPresets = const [],
   });
 
   LogoState copyWith({
@@ -35,6 +38,7 @@ class LogoState {
     ExportFormat? exportFormat,
     int? exportScale,
     bool? isExporting,
+    List<ColorPreset>? colorPresets,
   }) {
     return LogoState(
       selectedFont: selectedFont ?? this.selectedFont,
@@ -46,6 +50,7 @@ class LogoState {
       exportFormat: exportFormat ?? this.exportFormat,
       exportScale: exportScale ?? this.exportScale,
       isExporting: isExporting ?? this.isExporting,
+      colorPresets: colorPresets ?? this.colorPresets,
     );
   }
 }
