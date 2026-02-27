@@ -188,9 +188,10 @@ class _LogoPageState extends ConsumerState<LogoPage> {
             // Line count
             Row(
               children: [
-                Text('Lines',
-                    style: TextStyle(
-                        color: colors.mutedForeground, fontSize: 12)),
+                Text(
+                  'Lines',
+                  style: TextStyle(color: colors.mutedForeground, fontSize: 12),
+                ),
                 const SizedBox(width: 8),
                 ...List.generate(3, (i) {
                   final n = i + 1;
@@ -279,8 +280,7 @@ class _LogoPageState extends ConsumerState<LogoPage> {
             // Size
             _buildSectionLabel('SIZE', Icons.aspect_ratio),
             TextOnlyDropdownButton(
-              items:
-                  LogoConstants.sizePresets.map((p) => p.label).toList(),
+              items: LogoConstants.sizePresets.map((p) => p.label).toList(),
               value: logo.selectedSize,
               hint: 'Size',
               width: double.infinity,
@@ -288,8 +288,7 @@ class _LogoPageState extends ConsumerState<LogoPage> {
                 if (value != null) {
                   notifier.setSelectedSize(value);
                   if (value != 'Custom') {
-                    final preset =
-                        LogoConstants.sizePresets.firstWhere(
+                    final preset = LogoConstants.sizePresets.firstWhere(
                       (p) => p.label == value,
                     );
                     _widthController.text = preset.width.toString();
@@ -305,31 +304,28 @@ class _LogoPageState extends ConsumerState<LogoPage> {
                   Expanded(
                     child: TextField(
                       controller: _widthController,
-                      style: TextStyle(
-                          color: colors.foreground, fontSize: 14),
+                      style: TextStyle(color: colors.foreground, fontSize: 14),
                       decoration: _inputDecoration('W'),
                       keyboardType: TextInputType.number,
-                      inputFormatters: [
-                        FilteringTextInputFormatter.digitsOnly
-                      ],
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       onChanged: (_) => setState(() {}),
                     ),
                   ),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 6),
-                    child: Icon(Icons.close,
-                        size: 12, color: colors.mutedForeground),
+                    child: Icon(
+                      Icons.close,
+                      size: 12,
+                      color: colors.mutedForeground,
+                    ),
                   ),
                   Expanded(
                     child: TextField(
                       controller: _heightController,
-                      style: TextStyle(
-                          color: colors.foreground, fontSize: 14),
+                      style: TextStyle(color: colors.foreground, fontSize: 14),
                       decoration: _inputDecoration('H'),
                       keyboardType: TextInputType.number,
-                      inputFormatters: [
-                        FilteringTextInputFormatter.digitsOnly
-                      ],
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       onChanged: (_) => setState(() {}),
                     ),
                   ),
@@ -394,10 +390,7 @@ class _LogoPageState extends ConsumerState<LogoPage> {
               children: [
                 Text(
                   'Format',
-                  style: TextStyle(
-                    color: colors.mutedForeground,
-                    fontSize: 12,
-                  ),
+                  style: TextStyle(color: colors.mutedForeground, fontSize: 12),
                 ),
                 const SizedBox(width: 8),
                 _buildOptionChip(
@@ -442,8 +435,7 @@ class _LogoPageState extends ConsumerState<LogoPage> {
             // Output dimensions
             const SizedBox(height: 8),
             Container(
-              padding:
-                  const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+              padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
               decoration: BoxDecoration(
                 color: colors.muted,
                 borderRadius: BorderRadius.circular(radius.sm),
@@ -608,8 +600,10 @@ class _LogoPageState extends ConsumerState<LogoPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text('Cancel',
-                style: TextStyle(color: colors.mutedForeground)),
+            child: Text(
+              'Cancel',
+              style: TextStyle(color: colors.mutedForeground),
+            ),
           ),
           TextButton(
             onPressed: () {
@@ -620,8 +614,7 @@ class _LogoPageState extends ConsumerState<LogoPage> {
               ref.read(logoNotifierProvider.notifier).saveColorPreset(name);
               Navigator.pop(ctx);
             },
-            child:
-                Text('Save', style: TextStyle(color: colors.primary)),
+            child: Text('Save', style: TextStyle(color: colors.primary)),
           ),
         ],
       ),
@@ -644,7 +637,9 @@ class _LogoPageState extends ConsumerState<LogoPage> {
               ref.read(logoNotifierProvider.notifier).deleteColorPreset(id);
             },
             onRename: (id, newName) {
-              ref.read(logoNotifierProvider.notifier).renameColorPreset(id, newName);
+              ref
+                  .read(logoNotifierProvider.notifier)
+                  .renameColorPreset(id, newName);
             },
           );
         },
@@ -722,8 +717,11 @@ class _LogoPageState extends ConsumerState<LogoPage> {
                 color: colors.primary,
                 borderRadius: BorderRadius.circular(radius.sm),
               ),
-              child: Icon(Icons.auto_awesome,
-                  size: 18, color: colors.primaryForeground),
+              child: Icon(
+                Icons.auto_awesome,
+                size: 18,
+                color: colors.primaryForeground,
+              ),
             ),
             const SizedBox(width: 10),
             Text(
@@ -738,7 +736,8 @@ class _LogoPageState extends ConsumerState<LogoPage> {
         ),
         actions: [
           IconButton(
-            onPressed: () => ref.read(themeNotifierProvider.notifier).toggleTheme(),
+            onPressed: () =>
+                ref.read(themeNotifierProvider.notifier).toggleTheme(),
             icon: Icon(
               isDark ? Icons.light_mode_outlined : Icons.dark_mode_outlined,
               color: colors.foreground,
@@ -765,16 +764,10 @@ class _LogoPageState extends ConsumerState<LogoPage> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   // Preview (left, takes more space)
-                  Expanded(
-                    flex: 3,
-                    child: _buildPreviewPanel(),
-                  ),
+                  Expanded(flex: 3, child: _buildPreviewPanel()),
                   const SizedBox(width: 16),
                   // Controls (right)
-                  SizedBox(
-                    width: 300,
-                    child: _buildControlPanel(),
-                  ),
+                  SizedBox(width: 300, child: _buildControlPanel()),
                 ],
               ),
             );
@@ -784,15 +777,9 @@ class _LogoPageState extends ConsumerState<LogoPage> {
               padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
-                  Expanded(
-                    flex: 3,
-                    child: _buildPreviewPanel(),
-                  ),
+                  Expanded(flex: 3, child: _buildPreviewPanel()),
                   const SizedBox(height: 12),
-                  Expanded(
-                    flex: 2,
-                    child: _buildControlPanel(),
-                  ),
+                  Expanded(flex: 2, child: _buildControlPanel()),
                 ],
               ),
             );

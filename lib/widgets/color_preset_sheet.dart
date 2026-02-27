@@ -25,9 +25,7 @@ class ColorPresetSheet extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: colors.card,
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(radius.lg),
-        ),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(radius.lg)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -49,8 +47,11 @@ class ColorPresetSheet extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(20, 16, 8, 8),
             child: Row(
               children: [
-                Icon(Icons.palette_outlined,
-                    size: 18, color: colors.foreground),
+                Icon(
+                  Icons.palette_outlined,
+                  size: 18,
+                  color: colors.foreground,
+                ),
                 const SizedBox(width: 8),
                 Text(
                   'Saved Colors',
@@ -75,10 +76,7 @@ class ColorPresetSheet extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 40),
               child: Text(
                 'No saved presets',
-                style: TextStyle(
-                  color: colors.mutedForeground,
-                  fontSize: 14,
-                ),
+                style: TextStyle(color: colors.mutedForeground, fontSize: 14),
               ),
             )
           else
@@ -100,8 +98,10 @@ class ColorPresetSheet extends StatelessWidget {
                     },
                     onRename: () => _showRenameDialog(context, preset),
                     onDelete: () async {
-                      final confirmed =
-                          await _showDeleteConfirmDialog(context, preset);
+                      final confirmed = await _showDeleteConfirmDialog(
+                        context,
+                        preset,
+                      );
                       if (confirmed) onDelete(preset.id);
                     },
                   );
@@ -151,8 +151,10 @@ class ColorPresetSheet extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text('Cancel',
-                style: TextStyle(color: colors.mutedForeground)),
+            child: Text(
+              'Cancel',
+              style: TextStyle(color: colors.mutedForeground),
+            ),
           ),
           TextButton(
             onPressed: () {
@@ -170,7 +172,9 @@ class ColorPresetSheet extends StatelessWidget {
   }
 
   Future<bool> _showDeleteConfirmDialog(
-      BuildContext context, ColorPreset preset) async {
+    BuildContext context,
+    ColorPreset preset,
+  ) async {
     final colors = context.tweakcnColors;
 
     final result = await showDialog<bool>(
@@ -188,13 +192,14 @@ class ColorPresetSheet extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: Text('Cancel',
-                style: TextStyle(color: colors.mutedForeground)),
+            child: Text(
+              'Cancel',
+              style: TextStyle(color: colors.mutedForeground),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: Text('Delete',
-                style: TextStyle(color: colors.destructive)),
+            child: Text('Delete', style: TextStyle(color: colors.destructive)),
           ),
         ],
       ),
@@ -248,15 +253,21 @@ class _ColorPresetTile extends StatelessWidget {
             ),
             IconButton(
               onPressed: onRename,
-              icon: Icon(Icons.edit_outlined, size: 18,
-                  color: colors.mutedForeground),
+              icon: Icon(
+                Icons.edit_outlined,
+                size: 18,
+                color: colors.mutedForeground,
+              ),
               tooltip: 'Rename',
               visualDensity: VisualDensity.compact,
             ),
             IconButton(
               onPressed: onDelete,
-              icon: Icon(Icons.delete_outline, size: 18,
-                  color: colors.destructive),
+              icon: Icon(
+                Icons.delete_outline,
+                size: 18,
+                color: colors.destructive,
+              ),
               tooltip: 'Delete',
               visualDensity: VisualDensity.compact,
             ),

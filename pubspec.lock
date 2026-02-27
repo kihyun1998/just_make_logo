@@ -448,6 +448,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.11.0"
+  just_color_picker:
+    dependency: "direct main"
+    description:
+      name: just_color_picker
+      sha256: "8ad96d31353bfb8d89e1ad602e29e0ca63d907a9a07857770deb1bf946ba1249"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.4.0"
   leak_tracker:
     dependency: transitive
     description:

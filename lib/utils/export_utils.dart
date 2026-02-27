@@ -28,8 +28,7 @@ class ExportUtils {
   }
 
   static Future<Uint8List> _toJpg(ui.Image image, {int quality = 95}) async {
-    final byteData =
-        await image.toByteData(format: ui.ImageByteFormat.rawRgba);
+    final byteData = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
     final imgImage = img.Image.fromBytes(
       width: image.width,
       height: image.height,
@@ -53,8 +52,10 @@ class ExportUtils {
 
     final lines = text.split('\n');
     final lineCount = lines.length;
-    final maxChars =
-        lines.map((l) => l.length).reduce((a, b) => a > b ? a : b).clamp(1, 999);
+    final maxChars = lines
+        .map((l) => l.length)
+        .reduce((a, b) => a > b ? a : b)
+        .clamp(1, 999);
 
     final scaleFactor = (fontScale * 0.33).clamp(0.1, 1.0);
     final availableWidth = width * scaleFactor;
@@ -70,17 +71,20 @@ class ExportUtils {
 
     // Google Fonts URL for embedding
     final fontParam = fontFamily.replaceAll(' ', '+');
-    final fontUrl =
-        'https://fonts.googleapis.com/css2?family=$fontParam';
+    final fontUrl = 'https://fonts.googleapis.com/css2?family=$fontParam';
 
-    final textElements = lines.asMap().entries.map((entry) {
-      final y = startY + entry.key * lineHeight;
-      return '  <text x="${width / 2}" y="${y.toStringAsFixed(1)}" '
-          'text-anchor="middle" '
-          'font-family="\'$fontFamily\', sans-serif" '
-          'font-size="${fontSize.toStringAsFixed(1)}" '
-          'fill="$textHex">${_escapeXml(entry.value)}</text>';
-    }).join('\n');
+    final textElements = lines
+        .asMap()
+        .entries
+        .map((entry) {
+          final y = startY + entry.key * lineHeight;
+          return '  <text x="${width / 2}" y="${y.toStringAsFixed(1)}" '
+              'text-anchor="middle" '
+              'font-family="\'$fontFamily\', sans-serif" '
+              'font-size="${fontSize.toStringAsFixed(1)}" '
+              'fill="$textHex">${_escapeXml(entry.value)}</text>';
+        })
+        .join('\n');
 
     return '<?xml version="1.0" encoding="UTF-8"?>\n'
         '<svg xmlns="http://www.w3.org/2000/svg" width="$width" height="$height" viewBox="0 0 $width $height">\n'
@@ -128,8 +132,9 @@ class ExportUtils {
     double? fontScale,
   }) async {
     final ext = format.name;
-    final scaleLabel =
-        (format != ExportFormat.svg && scale > 1) ? '@${scale}x' : '';
+    final scaleLabel = (format != ExportFormat.svg && scale > 1)
+        ? '@${scale}x'
+        : '';
     final fileName = 'logo_${targetWidth}x$targetHeight$scaleLabel.$ext';
 
     final result = await FilePicker.platform.saveFile(
