@@ -399,13 +399,18 @@ class _LogoPageState extends ConsumerState<LogoPage> {
             // Export
             _buildSectionLabel('EXPORT', Icons.download_outlined),
             // Format selector
-            Row(
+            Wrap(
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 0,
+              runSpacing: 4,
               children: [
-                Text(
-                  'Format',
-                  style: TextStyle(color: colors.mutedForeground, fontSize: 12),
+                Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: Text(
+                    'Format',
+                    style: TextStyle(color: colors.mutedForeground, fontSize: 12),
+                  ),
                 ),
-                const SizedBox(width: 8),
                 _buildOptionChip(
                   'PNG',
                   isSelected: logo.exportFormat == ExportFormat.png,
@@ -427,16 +432,21 @@ class _LogoPageState extends ConsumerState<LogoPage> {
             // Scale selector (raster only)
             if (logo.exportFormat != ExportFormat.svg) ...[
               const SizedBox(height: 8),
-              Row(
+              Wrap(
+                crossAxisAlignment: WrapCrossAlignment.center,
+                spacing: 0,
+                runSpacing: 4,
                 children: [
-                  Text(
-                    'Scale',
-                    style: TextStyle(
-                      color: colors.mutedForeground,
-                      fontSize: 12,
+                  Padding(
+                    padding: const EdgeInsets.only(right: 12),
+                    child: Text(
+                      'Scale',
+                      style: TextStyle(
+                        color: colors.mutedForeground,
+                        fontSize: 12,
+                      ),
                     ),
                   ),
-                  const SizedBox(width: 12),
                   for (final s in [1, 2, 3, 4])
                     _buildOptionChip(
                       'x$s',
@@ -588,13 +598,18 @@ class _LogoPageState extends ConsumerState<LogoPage> {
         const SizedBox(height: 10),
 
         // Position
-        Row(
+        Wrap(
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: 0,
+          runSpacing: 4,
           children: [
-            Text(
-              'Position',
-              style: TextStyle(color: colors.mutedForeground, fontSize: 12),
+            Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: Text(
+                'Position',
+                style: TextStyle(color: colors.mutedForeground, fontSize: 12),
+              ),
             ),
-            const SizedBox(width: 8),
             _buildOptionChip(
               'Top',
               isSelected: logo.imagePosition == ImagePosition.top,
@@ -673,13 +688,18 @@ class _LogoPageState extends ConsumerState<LogoPage> {
         const SizedBox(height: 4),
 
         // Fit mode
-        Row(
+        Wrap(
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: 0,
+          runSpacing: 4,
           children: [
-            Text(
-              'Fit',
-              style: TextStyle(color: colors.mutedForeground, fontSize: 12),
+            Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: Text(
+                'Fit',
+                style: TextStyle(color: colors.mutedForeground, fontSize: 12),
+              ),
             ),
-            const SizedBox(width: 8),
             _buildOptionChip(
               'Contain',
               isSelected: logo.imageFitMode == ImageFitMode.contain,
