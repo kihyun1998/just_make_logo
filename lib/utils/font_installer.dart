@@ -6,6 +6,12 @@ class FontInstaller {
   static Future<void> openGoogleFontsPage(String fontFamily) async {
     final query = fontFamily.replaceAll(' ', '+');
     final url = 'https://fonts.google.com/specimen/$query';
-    await Process.run('cmd', ['/c', 'start', '', url]);
+    if (Platform.isMacOS) {
+      await Process.run('open', [url]);
+    } else if (Platform.isLinux) {
+      await Process.run('xdg-open', [url]);
+    } else if (Platform.isWindows) {
+      await Process.run('cmd', ['/c', 'start', '', url]);
+    }
   }
 }
