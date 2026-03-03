@@ -14,6 +14,7 @@ class LogoState {
   final Color backgroundColor;
   final Color textColor;
   final String selectedSize;
+  final double canvasPadding;
   final double textPadding;
   final int maxLines;
   final ExportFormat exportFormat;
@@ -31,6 +32,7 @@ class LogoState {
     this.backgroundColor = Colors.white,
     this.textColor = Colors.black,
     this.selectedSize = '512 x 512',
+    this.canvasPadding = 0.0,
     this.textPadding = 0.0,
     this.maxLines = 1,
     this.exportFormat = ExportFormat.png,
@@ -51,6 +53,7 @@ class LogoState {
     Color? backgroundColor,
     Color? textColor,
     String? selectedSize,
+    double? canvasPadding,
     double? textPadding,
     int? maxLines,
     ExportFormat? exportFormat,
@@ -68,6 +71,7 @@ class LogoState {
       backgroundColor: backgroundColor ?? this.backgroundColor,
       textColor: textColor ?? this.textColor,
       selectedSize: selectedSize ?? this.selectedSize,
+      canvasPadding: canvasPadding ?? this.canvasPadding,
       textPadding: textPadding ?? this.textPadding,
       maxLines: maxLines ?? this.maxLines,
       exportFormat: exportFormat ?? this.exportFormat,

@@ -150,6 +150,7 @@ class _LogoPageState extends ConsumerState<LogoPage> {
               text: _controller.text,
               textStyle: getFontStyle(logo.selectedFont, 120, logo.textColor),
               backgroundColor: logo.backgroundColor,
+              canvasPadding: logo.canvasPadding,
               textPadding: logo.textPadding,
               aspectRatio: aspectRatio,
               repaintBoundaryKey: _repaintBoundaryKey,
@@ -348,11 +349,61 @@ class _LogoPageState extends ConsumerState<LogoPage> {
 
             _buildDivider(),
 
-            // Text padding
+            // Padding
             _buildSectionLabel('PADDING', Icons.padding),
-            TextPaddingControl(
-              textPadding: logo.textPadding,
-              onChanged: (v) => notifier.setTextPadding(v),
+            Row(
+              children: [
+                SizedBox(
+                  width: 48,
+                  child: Text(
+                    'Canvas',
+                    style: TextStyle(color: colors.mutedForeground, fontSize: 12),
+                  ),
+                ),
+                Expanded(
+                  child: Slider(
+                    value: logo.canvasPadding,
+                    min: 0.0,
+                    max: 0.9,
+                    divisions: 18,
+                    onChanged: (v) => notifier.setCanvasPadding(v),
+                  ),
+                ),
+                SizedBox(
+                  width: 36,
+                  child: Text(
+                    '${(logo.canvasPadding * 100).round()}%',
+                    style: TextStyle(color: colors.mutedForeground, fontSize: 11),
+                  ),
+                ),
+              ],
+            ),
+            Row(
+              children: [
+                SizedBox(
+                  width: 48,
+                  child: Text(
+                    'Text',
+                    style: TextStyle(color: colors.mutedForeground, fontSize: 12),
+                  ),
+                ),
+                Expanded(
+                  child: Slider(
+                    value: logo.textPadding,
+                    min: 0.0,
+                    max: 0.9,
+                    divisions: 18,
+                    onChanged: (v) => notifier.setTextPadding(v),
+                  ),
+                ),
+                SizedBox(
+                  width: 36,
+                  child: Text(
+                    '${(logo.textPadding * 100).round()}%',
+                    style: TextStyle(color: colors.mutedForeground, fontSize: 11),
+                  ),
+                ),
+              ],
             ),
 
             _buildDivider(),
@@ -920,6 +971,7 @@ class _LogoPageState extends ConsumerState<LogoPage> {
         backgroundColor: logo.backgroundColor,
         textColor: logo.textColor,
         fontFamily: logo.selectedFont,
+        canvasPadding: logo.canvasPadding,
         textPadding: logo.textPadding,
       );
 

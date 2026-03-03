@@ -9,6 +9,7 @@ class LogoPreview extends StatelessWidget {
   final String text;
   final TextStyle textStyle;
   final Color backgroundColor;
+  final double canvasPadding;
   final double textPadding;
   final double aspectRatio;
   final GlobalKey? repaintBoundaryKey;
@@ -23,6 +24,7 @@ class LogoPreview extends StatelessWidget {
     required this.text,
     required this.textStyle,
     required this.backgroundColor,
+    required this.canvasPadding,
     required this.textPadding,
     required this.aspectRatio,
     this.repaintBoundaryKey,
@@ -134,7 +136,15 @@ class LogoPreview extends StatelessWidget {
               key: repaintBoundaryKey,
               child: Container(
                 color: backgroundColor,
-                child: _buildContent(),
+                child: canvasPadding > 0
+                    ? Center(
+                        child: FractionallySizedBox(
+                          widthFactor: (1.0 - canvasPadding).clamp(0.1, 1.0),
+                          heightFactor: (1.0 - canvasPadding).clamp(0.1, 1.0),
+                          child: _buildContent(),
+                        ),
+                      )
+                    : _buildContent(),
               ),
             ),
           ),

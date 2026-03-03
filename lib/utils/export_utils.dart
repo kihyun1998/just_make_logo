@@ -45,6 +45,7 @@ class ExportUtils {
     required Color backgroundColor,
     required Color textColor,
     required String fontFamily,
+    required double canvasPadding,
     required double textPadding,
   }) {
     final bgHex = _colorToHex(backgroundColor);
@@ -57,9 +58,10 @@ class ExportUtils {
         .reduce((a, b) => a > b ? a : b)
         .clamp(1, 999);
 
-    final scaleFactor = (1.0 - textPadding).clamp(0.1, 1.0);
-    final availableWidth = width * scaleFactor;
-    final availableHeight = height * scaleFactor;
+    final canvasScale = (1.0 - canvasPadding).clamp(0.1, 1.0);
+    final textScale = (1.0 - textPadding).clamp(0.1, 1.0);
+    final availableWidth = width * canvasScale * textScale;
+    final availableHeight = height * canvasScale * textScale;
 
     final byWidth = availableWidth / (maxChars * 0.6);
     final byHeight = availableHeight / (lineCount * 1.2);
@@ -129,6 +131,7 @@ class ExportUtils {
     Color? backgroundColor,
     Color? textColor,
     String? fontFamily,
+    double? canvasPadding,
     double? textPadding,
   }) async {
     final ext = format.name;
@@ -178,6 +181,7 @@ class ExportUtils {
           backgroundColor: backgroundColor!,
           textColor: textColor!,
           fontFamily: fontFamily!,
+          canvasPadding: canvasPadding!,
           textPadding: textPadding!,
         );
         await file.writeAsString(svgContent);

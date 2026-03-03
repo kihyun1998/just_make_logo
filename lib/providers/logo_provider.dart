@@ -87,6 +87,10 @@ class LogoNotifier extends _$LogoNotifier {
     state = state.copyWith(selectedSize: size);
   }
 
+  void setCanvasPadding(double padding) {
+    state = state.copyWith(canvasPadding: padding);
+  }
+
   void setTextPadding(double padding) {
     state = state.copyWith(textPadding: padding);
   }
