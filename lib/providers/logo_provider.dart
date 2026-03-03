@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -94,6 +96,7 @@ class LogoNotifier extends _$LogoNotifier {
   }
 
   void setExportFormat(ExportFormat format) {
+    if (format == ExportFormat.svg && state.hasImage) return;
     if (format == ExportFormat.svg) {
       state = state.copyWith(exportFormat: format, exportScale: 1);
     } else {
@@ -107,5 +110,32 @@ class LogoNotifier extends _$LogoNotifier {
 
   void setIsExporting(bool value) {
     state = state.copyWith(isExporting: value);
+  }
+
+  void setImageBytes(Uint8List? bytes) {
+    state = state.copyWith(imageBytes: bytes);
+    if (bytes != null && state.exportFormat == ExportFormat.svg) {
+      state = state.copyWith(exportFormat: ExportFormat.png);
+    }
+  }
+
+  void setImagePosition(ImagePosition pos) {
+    state = state.copyWith(imagePosition: pos);
+  }
+
+  void setImageFlexRatio(double ratio) {
+    state = state.copyWith(imageFlexRatio: ratio.clamp(0.1, 0.9));
+  }
+
+  void setImageGap(double gap) {
+    state = state.copyWith(imageGap: gap.clamp(0, 50));
+  }
+
+  void setImageFitMode(ImageFitMode mode) {
+    state = state.copyWith(imageFitMode: mode);
+  }
+
+  void clearImage() {
+    state = state.copyWith(imageBytes: null);
   }
 }

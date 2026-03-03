@@ -6,7 +6,7 @@ part of 'logo_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$logoNotifierHash() => r'e1aa356e0c0b6be1726eb74cbefc0d35782a5a29';
+String _$logoNotifierHash() => r'd785af47ff7f35e4aab8fc29bc625b7a5d22a216';
 
 /// See also [LogoNotifier].
 @ProviderFor(LogoNotifier)

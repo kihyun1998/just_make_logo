@@ -1,9 +1,11 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dropdown_button/flutter_dropdown_button.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../constants/logo_constants.dart';
+import '../models/logo_state.dart';
 import '../providers/logo_provider.dart';
 import '../providers/theme_provider.dart';
 import '../theme/tweakcn_theme.g.dart';
@@ -151,6 +153,11 @@ class _LogoPageState extends ConsumerState<LogoPage> {
               fontScale: logo.fontScale,
               aspectRatio: aspectRatio,
               repaintBoundaryKey: _repaintBoundaryKey,
+              imageBytes: logo.imageBytes,
+              imagePosition: logo.imagePosition,
+              imageFlexRatio: logo.imageFlexRatio,
+              imageGap: logo.imageGap,
+              imageFitMode: logo.imageFitMode,
             ),
           ),
         ],
@@ -175,6 +182,12 @@ class _LogoPageState extends ConsumerState<LogoPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            // Image
+            _buildSectionLabel('IMAGE', Icons.image_outlined),
+            _buildImageControls(logo, notifier),
+
+            _buildDivider(),
+
             // Text input
             _buildSectionLabel('TEXT', Icons.text_fields),
             TextField(
@@ -407,6 +420,7 @@ class _LogoPageState extends ConsumerState<LogoPage> {
                   'SVG',
                   isSelected: logo.exportFormat == ExportFormat.svg,
                   onTap: () => notifier.setExportFormat(ExportFormat.svg),
+                  disabled: logo.hasImage,
                 ),
               ],
             ),
@@ -490,6 +504,213 @@ class _LogoPageState extends ConsumerState<LogoPage> {
     );
   }
 
+  Widget _buildImageControls(LogoState logo, LogoNotifier notifier) {
+    final colors = context.tweakcnColors;
+    final radius = context.tweakcnRadius;
+
+    if (!logo.hasImage) {
+      // Show only the pick button
+      return SizedBox(
+        width: double.infinity,
+        child: OutlinedButton.icon(
+          onPressed: () => _handlePickImage(notifier),
+          style: OutlinedButton.styleFrom(
+            foregroundColor: colors.mutedForeground,
+            side: BorderSide(color: colors.border),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(radius.sm),
+            ),
+            padding: const EdgeInsets.symmetric(vertical: 10),
+          ),
+          icon: const Icon(Icons.add_photo_alternate_outlined, size: 16),
+          label: const Text('Select Image', style: TextStyle(fontSize: 12)),
+        ),
+      );
+    }
+
+    // Image is loaded: show thumbnail + controls
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // Thumbnail + delete
+        Row(
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(radius.sm),
+                border: Border.all(color: colors.border),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(radius.sm),
+                child: Image.memory(
+                  logo.imageBytes!,
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: OutlinedButton.icon(
+                onPressed: () => _handlePickImage(notifier),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: colors.mutedForeground,
+                  side: BorderSide(color: colors.border),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(radius.sm),
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                ),
+                icon: const Icon(Icons.swap_horiz, size: 14),
+                label: const Text('Change', style: TextStyle(fontSize: 11)),
+              ),
+            ),
+            const SizedBox(width: 4),
+            SizedBox(
+              width: 36,
+              height: 36,
+              child: IconButton(
+                onPressed: () => notifier.clearImage(),
+                icon: Icon(Icons.close, size: 16, color: colors.mutedForeground),
+                tooltip: 'Remove image',
+                padding: EdgeInsets.zero,
+                style: IconButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(radius.sm),
+                    side: BorderSide(color: colors.border),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+
+        // Position
+        Row(
+          children: [
+            Text(
+              'Position',
+              style: TextStyle(color: colors.mutedForeground, fontSize: 12),
+            ),
+            const SizedBox(width: 8),
+            _buildOptionChip(
+              'Top',
+              isSelected: logo.imagePosition == ImagePosition.top,
+              onTap: () => notifier.setImagePosition(ImagePosition.top),
+            ),
+            _buildOptionChip(
+              'Bottom',
+              isSelected: logo.imagePosition == ImagePosition.bottom,
+              onTap: () => notifier.setImagePosition(ImagePosition.bottom),
+            ),
+            _buildOptionChip(
+              'Left',
+              isSelected: logo.imagePosition == ImagePosition.left,
+              onTap: () => notifier.setImagePosition(ImagePosition.left),
+            ),
+            _buildOptionChip(
+              'Right',
+              isSelected: logo.imagePosition == ImagePosition.right,
+              onTap: () => notifier.setImagePosition(ImagePosition.right),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+
+        // Flex ratio slider
+        Row(
+          children: [
+            Text(
+              'Ratio',
+              style: TextStyle(color: colors.mutedForeground, fontSize: 12),
+            ),
+            Expanded(
+              child: Slider(
+                value: logo.imageFlexRatio,
+                min: 0.1,
+                max: 0.9,
+                divisions: 16,
+                onChanged: (v) => notifier.setImageFlexRatio(v),
+              ),
+            ),
+            SizedBox(
+              width: 32,
+              child: Text(
+                '${(logo.imageFlexRatio * 100).round()}%',
+                style: TextStyle(color: colors.mutedForeground, fontSize: 11),
+              ),
+            ),
+          ],
+        ),
+
+        // Gap slider
+        Row(
+          children: [
+            Text(
+              'Gap',
+              style: TextStyle(color: colors.mutedForeground, fontSize: 12),
+            ),
+            Expanded(
+              child: Slider(
+                value: logo.imageGap,
+                min: 0,
+                max: 50,
+                divisions: 50,
+                onChanged: (v) => notifier.setImageGap(v),
+              ),
+            ),
+            SizedBox(
+              width: 32,
+              child: Text(
+                '${logo.imageGap.round()}',
+                style: TextStyle(color: colors.mutedForeground, fontSize: 11),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 4),
+
+        // Fit mode
+        Row(
+          children: [
+            Text(
+              'Fit',
+              style: TextStyle(color: colors.mutedForeground, fontSize: 12),
+            ),
+            const SizedBox(width: 8),
+            _buildOptionChip(
+              'Contain',
+              isSelected: logo.imageFitMode == ImageFitMode.contain,
+              onTap: () => notifier.setImageFitMode(ImageFitMode.contain),
+            ),
+            _buildOptionChip(
+              'Cover',
+              isSelected: logo.imageFitMode == ImageFitMode.cover,
+              onTap: () => notifier.setImageFitMode(ImageFitMode.cover),
+            ),
+            _buildOptionChip(
+              'Fill',
+              isSelected: logo.imageFitMode == ImageFitMode.fill,
+              onTap: () => notifier.setImageFitMode(ImageFitMode.fill),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Future<void> _handlePickImage(LogoNotifier notifier) async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.image,
+      withData: true,
+    );
+    if (result != null && result.files.single.bytes != null) {
+      notifier.setImageBytes(result.files.single.bytes!);
+    }
+  }
+
   Widget _buildDivider() {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12),
@@ -501,28 +722,38 @@ class _LogoPageState extends ConsumerState<LogoPage> {
     String label, {
     required bool isSelected,
     required VoidCallback onTap,
+    bool disabled = false,
   }) {
     final colors = context.tweakcnColors;
     final radius = context.tweakcnRadius;
     return Padding(
       padding: const EdgeInsets.only(right: 4),
       child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-          decoration: BoxDecoration(
-            color: isSelected ? colors.primary : Colors.transparent,
-            borderRadius: BorderRadius.circular(radius.sm),
-            border: isSelected ? null : Border.all(color: colors.border),
-          ),
-          child: Text(
-            label,
-            style: TextStyle(
-              color: isSelected
-                  ? colors.primaryForeground
-                  : colors.mutedForeground,
-              fontSize: 12,
-              fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+        onTap: disabled ? null : onTap,
+        child: Opacity(
+          opacity: disabled ? 0.4 : 1.0,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            decoration: BoxDecoration(
+              color: isSelected && !disabled
+                  ? colors.primary
+                  : Colors.transparent,
+              borderRadius: BorderRadius.circular(radius.sm),
+              border: isSelected && !disabled
+                  ? null
+                  : Border.all(color: colors.border),
+            ),
+            child: Text(
+              label,
+              style: TextStyle(
+                color: isSelected && !disabled
+                    ? colors.primaryForeground
+                    : colors.mutedForeground,
+                fontSize: 12,
+                fontWeight: isSelected && !disabled
+                    ? FontWeight.w600
+                    : FontWeight.normal,
+              ),
             ),
           ),
         ),

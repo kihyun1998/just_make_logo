@@ -1,7 +1,13 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 
 import '../utils/export_utils.dart';
 import 'color_preset.dart';
+
+enum ImagePosition { top, bottom, left, right }
+
+enum ImageFitMode { contain, cover, fill }
 
 class LogoState {
   final String selectedFont;
@@ -14,6 +20,11 @@ class LogoState {
   final int exportScale;
   final bool isExporting;
   final List<ColorPreset> colorPresets;
+  final Uint8List? imageBytes;
+  final ImagePosition imagePosition;
+  final double imageFlexRatio;
+  final double imageGap;
+  final ImageFitMode imageFitMode;
 
   const LogoState({
     this.selectedFont = 'Workbench',
@@ -26,7 +37,14 @@ class LogoState {
     this.exportScale = 1,
     this.isExporting = false,
     this.colorPresets = const [],
+    this.imageBytes,
+    this.imagePosition = ImagePosition.top,
+    this.imageFlexRatio = 0.5,
+    this.imageGap = 8,
+    this.imageFitMode = ImageFitMode.contain,
   });
+
+  bool get hasImage => imageBytes != null;
 
   LogoState copyWith({
     String? selectedFont,
@@ -39,6 +57,11 @@ class LogoState {
     int? exportScale,
     bool? isExporting,
     List<ColorPreset>? colorPresets,
+    Object? imageBytes = _sentinel,
+    ImagePosition? imagePosition,
+    double? imageFlexRatio,
+    double? imageGap,
+    ImageFitMode? imageFitMode,
   }) {
     return LogoState(
       selectedFont: selectedFont ?? this.selectedFont,
@@ -51,6 +74,15 @@ class LogoState {
       exportScale: exportScale ?? this.exportScale,
       isExporting: isExporting ?? this.isExporting,
       colorPresets: colorPresets ?? this.colorPresets,
+      imageBytes: imageBytes == _sentinel
+          ? this.imageBytes
+          : imageBytes as Uint8List?,
+      imagePosition: imagePosition ?? this.imagePosition,
+      imageFlexRatio: imageFlexRatio ?? this.imageFlexRatio,
+      imageGap: imageGap ?? this.imageGap,
+      imageFitMode: imageFitMode ?? this.imageFitMode,
     );
   }
 }
+
+const _sentinel = Object();
