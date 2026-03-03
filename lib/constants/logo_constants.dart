@@ -3,7 +3,18 @@ import 'package:flutter/material.dart';
 import '../models/size_preset.dart';
 
 class LogoConstants {
-  static const List<String> fonts = ['Workbench', 'Jersey 20', 'Noto Serif'];
+  static const List<String> fonts = [
+    'Workbench',
+    'Jersey 20',
+    'Noto Serif',
+    'Bebas Neue',
+    'Pacifico',
+    'Lobster',
+    'Raleway',
+    'Permanent Marker',
+    'Black Han Sans',
+    'Noto Sans KR',
+  ];
 
   static const List<Color> colors = [
     Colors.white,
