@@ -14,7 +14,7 @@ class LogoState {
   final Color backgroundColor;
   final Color textColor;
   final String selectedSize;
-  final double fontScale;
+  final double textPadding;
   final int maxLines;
   final ExportFormat exportFormat;
   final int exportScale;
@@ -31,7 +31,7 @@ class LogoState {
     this.backgroundColor = Colors.white,
     this.textColor = Colors.black,
     this.selectedSize = '512 x 512',
-    this.fontScale = 1.0,
+    this.textPadding = 0.0,
     this.maxLines = 1,
     this.exportFormat = ExportFormat.png,
     this.exportScale = 1,
@@ -51,7 +51,7 @@ class LogoState {
     Color? backgroundColor,
     Color? textColor,
     String? selectedSize,
-    double? fontScale,
+    double? textPadding,
     int? maxLines,
     ExportFormat? exportFormat,
     int? exportScale,
@@ -68,7 +68,7 @@ class LogoState {
       backgroundColor: backgroundColor ?? this.backgroundColor,
       textColor: textColor ?? this.textColor,
       selectedSize: selectedSize ?? this.selectedSize,
-      fontScale: fontScale ?? this.fontScale,
+      textPadding: textPadding ?? this.textPadding,
       maxLines: maxLines ?? this.maxLines,
       exportFormat: exportFormat ?? this.exportFormat,
       exportScale: exportScale ?? this.exportScale,

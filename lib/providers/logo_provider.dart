@@ -87,8 +87,8 @@ class LogoNotifier extends _$LogoNotifier {
     state = state.copyWith(selectedSize: size);
   }
 
-  void setFontScale(double scale) {
-    state = state.copyWith(fontScale: scale);
+  void setTextPadding(double padding) {
+    state = state.copyWith(textPadding: padding);
   }
 
   void setMaxLines(int lines) {

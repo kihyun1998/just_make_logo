@@ -9,7 +9,7 @@ class LogoPreview extends StatelessWidget {
   final String text;
   final TextStyle textStyle;
   final Color backgroundColor;
-  final double fontScale;
+  final double textPadding;
   final double aspectRatio;
   final GlobalKey? repaintBoundaryKey;
   final Uint8List? imageBytes;
@@ -23,7 +23,7 @@ class LogoPreview extends StatelessWidget {
     required this.text,
     required this.textStyle,
     required this.backgroundColor,
-    required this.fontScale,
+    required this.textPadding,
     required this.aspectRatio,
     this.repaintBoundaryKey,
     this.imageBytes,
@@ -47,8 +47,8 @@ class LogoPreview extends StatelessWidget {
   Widget _buildTextWidget() {
     return Center(
       child: FractionallySizedBox(
-        widthFactor: (fontScale * 0.33).clamp(0.1, 1.0),
-        heightFactor: (fontScale * 0.33).clamp(0.1, 1.0),
+        widthFactor: (1.0 - textPadding).clamp(0.1, 1.0),
+        heightFactor: (1.0 - textPadding).clamp(0.1, 1.0),
         child: FittedBox(
           fit: BoxFit.contain,
           child: Text(

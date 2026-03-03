@@ -150,7 +150,7 @@ class _LogoPageState extends ConsumerState<LogoPage> {
               text: _controller.text,
               textStyle: getFontStyle(logo.selectedFont, 120, logo.textColor),
               backgroundColor: logo.backgroundColor,
-              fontScale: logo.fontScale,
+              textPadding: logo.textPadding,
               aspectRatio: aspectRatio,
               repaintBoundaryKey: _repaintBoundaryKey,
               imageBytes: logo.imageBytes,
@@ -348,11 +348,11 @@ class _LogoPageState extends ConsumerState<LogoPage> {
 
             _buildDivider(),
 
-            // Font scale
-            _buildSectionLabel('SCALE', Icons.zoom_in),
-            FontScaleControl(
-              fontScale: logo.fontScale,
-              onChanged: (v) => notifier.setFontScale(v),
+            // Text padding
+            _buildSectionLabel('PADDING', Icons.padding),
+            TextPaddingControl(
+              textPadding: logo.textPadding,
+              onChanged: (v) => notifier.setTextPadding(v),
             ),
 
             _buildDivider(),
@@ -920,7 +920,7 @@ class _LogoPageState extends ConsumerState<LogoPage> {
         backgroundColor: logo.backgroundColor,
         textColor: logo.textColor,
         fontFamily: logo.selectedFont,
-        fontScale: logo.fontScale,
+        textPadding: logo.textPadding,
       );
 
       if (mounted) {

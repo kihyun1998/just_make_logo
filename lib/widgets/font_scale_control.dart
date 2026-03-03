@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 
 import '../theme/tweakcn_theme.g.dart';
 
-class FontScaleControl extends StatelessWidget {
-  final double fontScale;
+class TextPaddingControl extends StatelessWidget {
+  final double textPadding;
   final ValueChanged<double> onChanged;
 
-  const FontScaleControl({
+  const TextPaddingControl({
     super.key,
-    required this.fontScale,
+    required this.textPadding,
     required this.onChanged,
   });
 
@@ -19,12 +19,14 @@ class FontScaleControl extends StatelessWidget {
 
     return Row(
       children: [
-        Icon(Icons.text_fields, size: 16, color: colors.mutedForeground),
+        Icon(Icons.padding, size: 16, color: colors.mutedForeground),
         const SizedBox(width: 6),
         _buildButton(
           icon: Icons.remove,
-          enabled: fontScale > 0.5,
-          onTap: () => onChanged((fontScale - 0.1).clamp(0.5, 3.0)),
+          enabled: textPadding > 0.0,
+          onTap: () => onChanged(
+            (((textPadding * 100).round() - 5) / 100).clamp(0.0, 0.9),
+          ),
           colors: colors,
           radius: radius,
         ),
@@ -39,18 +41,20 @@ class FontScaleControl extends StatelessWidget {
               thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
             ),
             child: Slider(
-              value: fontScale,
-              min: 0.5,
-              max: 3.0,
-              divisions: 25,
+              value: textPadding,
+              min: 0.0,
+              max: 0.9,
+              divisions: 18,
               onChanged: onChanged,
             ),
           ),
         ),
         _buildButton(
           icon: Icons.add,
-          enabled: fontScale < 3.0,
-          onTap: () => onChanged((fontScale + 0.1).clamp(0.5, 3.0)),
+          enabled: textPadding < 0.9,
+          onTap: () => onChanged(
+            (((textPadding * 100).round() + 5) / 100).clamp(0.0, 0.9),
+          ),
           colors: colors,
           radius: radius,
         ),
@@ -62,7 +66,7 @@ class FontScaleControl extends StatelessWidget {
             borderRadius: BorderRadius.circular(radius.sm),
           ),
           child: Text(
-            '${(fontScale * 100).round()}%',
+            '${(textPadding * 100).round()}%',
             style: TextStyle(
               color: colors.foreground,
               fontSize: 12,

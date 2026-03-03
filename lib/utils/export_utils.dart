@@ -45,7 +45,7 @@ class ExportUtils {
     required Color backgroundColor,
     required Color textColor,
     required String fontFamily,
-    required double fontScale,
+    required double textPadding,
   }) {
     final bgHex = _colorToHex(backgroundColor);
     final textHex = _colorToHex(textColor);
@@ -57,7 +57,7 @@ class ExportUtils {
         .reduce((a, b) => a > b ? a : b)
         .clamp(1, 999);
 
-    final scaleFactor = (fontScale * 0.33).clamp(0.1, 1.0);
+    final scaleFactor = (1.0 - textPadding).clamp(0.1, 1.0);
     final availableWidth = width * scaleFactor;
     final availableHeight = height * scaleFactor;
 
@@ -129,7 +129,7 @@ class ExportUtils {
     Color? backgroundColor,
     Color? textColor,
     String? fontFamily,
-    double? fontScale,
+    double? textPadding,
   }) async {
     final ext = format.name;
     final scaleLabel = (format != ExportFormat.svg && scale > 1)
@@ -178,7 +178,7 @@ class ExportUtils {
           backgroundColor: backgroundColor!,
           textColor: textColor!,
           fontFamily: fontFamily!,
-          fontScale: fontScale!,
+          textPadding: textPadding!,
         );
         await file.writeAsString(svgContent);
     }
