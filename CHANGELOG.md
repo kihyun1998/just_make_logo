@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.11.2
+
+### Improvements
+- Improved dropdown button styling with item padding, hover effects, and border radius
+- Dropdown buttons now visually match surrounding input fields
+
 ## 0.11.1
 
 ### Improvements

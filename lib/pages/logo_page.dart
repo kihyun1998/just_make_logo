@@ -63,6 +63,57 @@ class _LogoPageState extends ConsumerState<LogoPage> {
     super.dispose();
   }
 
+  DropdownStyleTheme _dropdownTheme() {
+    final colors = context.tweakcnColors;
+    final radius = context.tweakcnRadius;
+    return DropdownStyleTheme(
+      dropdown: DropdownTheme(
+        borderRadius: radius.md,
+        elevation: 2.0,
+        backgroundColor: colors.card,
+        border: Border.all(color: colors.border),
+        buttonPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        itemPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        overlayPadding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+        itemMargin: const EdgeInsets.symmetric(vertical: 2),
+        itemBorderRadius: radius.sm,
+        selectedItemColor: colors.muted,
+        itemHoverColor: colors.muted,
+        itemSplashColor: Colors.transparent,
+        itemHighlightColor: Colors.transparent,
+        buttonHoverColor: Colors.transparent,
+        buttonHighlightColor: Colors.transparent,
+        buttonSplashColor: Colors.transparent,
+        shadowColor: colors.border,
+        buttonDecoration: BoxDecoration(
+          color: colors.muted,
+          borderRadius: BorderRadius.circular(radius.md),
+          border: Border.all(color: colors.input),
+        ),
+        iconColor: colors.mutedForeground,
+        iconSize: 18,
+      ),
+      scroll: DropdownScrollTheme(
+        thumbColor: colors.mutedForeground,
+        radius: const Radius.circular(4),
+        thumbWidth: 3,
+        trackWidth: 3,
+      ),
+    );
+  }
+
+  TextDropdownConfig _dropdownConfig() {
+    final colors = context.tweakcnColors;
+    return TextDropdownConfig(
+      textStyle: TextStyle(color: colors.foreground, fontSize: 13),
+      selectedTextStyle: TextStyle(
+        color: colors.foreground,
+        fontSize: 13,
+        fontWeight: FontWeight.w600,
+      ),
+    );
+  }
+
   InputDecoration _inputDecoration(String label) {
     final colors = context.tweakcnColors;
     final radius = context.tweakcnRadius;
@@ -291,6 +342,8 @@ class _LogoPageState extends ConsumerState<LogoPage> {
                       value: logo.selectedFont,
                       hint: 'Font',
                       width: double.infinity,
+                      theme: _dropdownTheme(),
+                      config: _dropdownConfig(),
                       onChanged: (value) {
                         if (value != null) {
                           notifier.setFont(value);
@@ -332,6 +385,8 @@ class _LogoPageState extends ConsumerState<LogoPage> {
               value: logo.selectedSize,
               hint: 'Size',
               width: double.infinity,
+              theme: _dropdownTheme(),
+              config: _dropdownConfig(),
               onChanged: (value) {
                 if (value != null) {
                   notifier.setSelectedSize(value);
