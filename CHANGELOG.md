@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.11.0
+
+### Improvements
+- Image Only mode now fills the entire canvas (controlled by canvas padding)
+- Hide Position/Ratio/Gap controls in Image Only mode (only relevant for Text + Image)
+
 ## 0.10.0
 
 ### Features

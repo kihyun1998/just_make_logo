@@ -761,97 +761,100 @@ class _LogoPageState extends ConsumerState<LogoPage> {
             ),
           ],
         ),
-        const SizedBox(height: 10),
+        // Position, Ratio, Gap only matter when text + image
+        if (logo.logoMode == LogoMode.textAndImage) ...[
+          const SizedBox(height: 10),
 
-        // Position
-        Wrap(
-          crossAxisAlignment: WrapCrossAlignment.center,
-          spacing: 0,
-          runSpacing: 4,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(right: 8),
-              child: Text(
-                'Position',
+          // Position
+          Wrap(
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 0,
+            runSpacing: 4,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: Text(
+                  'Position',
+                  style: TextStyle(color: colors.mutedForeground, fontSize: 12),
+                ),
+              ),
+              _buildOptionChip(
+                'Top',
+                isSelected: logo.imagePosition == ImagePosition.top,
+                onTap: () => notifier.setImagePosition(ImagePosition.top),
+              ),
+              _buildOptionChip(
+                'Bottom',
+                isSelected: logo.imagePosition == ImagePosition.bottom,
+                onTap: () => notifier.setImagePosition(ImagePosition.bottom),
+              ),
+              _buildOptionChip(
+                'Left',
+                isSelected: logo.imagePosition == ImagePosition.left,
+                onTap: () => notifier.setImagePosition(ImagePosition.left),
+              ),
+              _buildOptionChip(
+                'Right',
+                isSelected: logo.imagePosition == ImagePosition.right,
+                onTap: () => notifier.setImagePosition(ImagePosition.right),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+
+          // Flex ratio slider
+          Row(
+            children: [
+              Text(
+                'Ratio',
                 style: TextStyle(color: colors.mutedForeground, fontSize: 12),
               ),
-            ),
-            _buildOptionChip(
-              'Top',
-              isSelected: logo.imagePosition == ImagePosition.top,
-              onTap: () => notifier.setImagePosition(ImagePosition.top),
-            ),
-            _buildOptionChip(
-              'Bottom',
-              isSelected: logo.imagePosition == ImagePosition.bottom,
-              onTap: () => notifier.setImagePosition(ImagePosition.bottom),
-            ),
-            _buildOptionChip(
-              'Left',
-              isSelected: logo.imagePosition == ImagePosition.left,
-              onTap: () => notifier.setImagePosition(ImagePosition.left),
-            ),
-            _buildOptionChip(
-              'Right',
-              isSelected: logo.imagePosition == ImagePosition.right,
-              onTap: () => notifier.setImagePosition(ImagePosition.right),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
+              Expanded(
+                child: Slider(
+                  value: logo.imageFlexRatio,
+                  min: 0.1,
+                  max: 0.9,
+                  divisions: 16,
+                  onChanged: (v) => notifier.setImageFlexRatio(v),
+                ),
+              ),
+              SizedBox(
+                width: 32,
+                child: Text(
+                  '${(logo.imageFlexRatio * 100).round()}%',
+                  style: TextStyle(color: colors.mutedForeground, fontSize: 11),
+                ),
+              ),
+            ],
+          ),
 
-        // Flex ratio slider
-        Row(
-          children: [
-            Text(
-              'Ratio',
-              style: TextStyle(color: colors.mutedForeground, fontSize: 12),
-            ),
-            Expanded(
-              child: Slider(
-                value: logo.imageFlexRatio,
-                min: 0.1,
-                max: 0.9,
-                divisions: 16,
-                onChanged: (v) => notifier.setImageFlexRatio(v),
+          // Gap slider
+          Row(
+            children: [
+              Text(
+                'Gap',
+                style: TextStyle(color: colors.mutedForeground, fontSize: 12),
               ),
-            ),
-            SizedBox(
-              width: 32,
-              child: Text(
-                '${(logo.imageFlexRatio * 100).round()}%',
-                style: TextStyle(color: colors.mutedForeground, fontSize: 11),
+              Expanded(
+                child: Slider(
+                  value: logo.imageGap,
+                  min: 0,
+                  max: 50,
+                  divisions: 50,
+                  onChanged: (v) => notifier.setImageGap(v),
+                ),
               ),
-            ),
-          ],
-        ),
-
-        // Gap slider
-        Row(
-          children: [
-            Text(
-              'Gap',
-              style: TextStyle(color: colors.mutedForeground, fontSize: 12),
-            ),
-            Expanded(
-              child: Slider(
-                value: logo.imageGap,
-                min: 0,
-                max: 50,
-                divisions: 50,
-                onChanged: (v) => notifier.setImageGap(v),
+              SizedBox(
+                width: 32,
+                child: Text(
+                  '${logo.imageGap.round()}',
+                  style: TextStyle(color: colors.mutedForeground, fontSize: 11),
+                ),
               ),
-            ),
-            SizedBox(
-              width: 32,
-              child: Text(
-                '${logo.imageGap.round()}',
-                style: TextStyle(color: colors.mutedForeground, fontSize: 11),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 4),
+            ],
+          ),
+          const SizedBox(height: 4),
+        ],
 
         // Fit mode
         Wrap(

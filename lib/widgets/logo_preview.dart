@@ -88,7 +88,9 @@ class LogoPreview extends StatelessWidget {
           ),
         );
       }
-      return Center(child: _buildImageWidget());
+      return SizedBox.expand(
+        child: Image.memory(imageBytes!, fit: _toBoxFit(imageFitMode)),
+      );
     }
 
     // Text + Image mode
