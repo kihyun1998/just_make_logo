@@ -19,6 +19,8 @@ class LogoPreview extends StatelessWidget {
   final double imageFlexRatio;
   final double imageGap;
   final ImageFitMode imageFitMode;
+  final bool transparentBackground;
+  final double exportBorderRadius;
 
   const LogoPreview({
     super.key,
@@ -35,6 +37,8 @@ class LogoPreview extends StatelessWidget {
     this.imageFlexRatio = 0.5,
     this.imageGap = 8,
     this.imageFitMode = ImageFitMode.contain,
+    this.transparentBackground = false,
+    this.exportBorderRadius = 0.0,
   });
 
   BoxFit _toBoxFit(ImageFitMode mode) {
@@ -55,21 +59,14 @@ class LogoPreview extends StatelessWidget {
         heightFactor: (1.0 - textPadding).clamp(0.1, 1.0),
         child: FittedBox(
           fit: BoxFit.contain,
-          child: Text(
-            text,
-            style: textStyle,
-            textAlign: TextAlign.center,
-          ),
+          child: Text(text, style: textStyle, textAlign: TextAlign.center),
         ),
       ),
     );
   }
 
   Widget _buildImageWidget() {
-    return Image.memory(
-      imageBytes!,
-      fit: _toBoxFit(imageFitMode),
-    );
+    return Image.memory(imageBytes!, fit: _toBoxFit(imageFitMode));
   }
 
   Widget _buildContent() {
@@ -84,7 +81,11 @@ class LogoPreview extends StatelessWidget {
     if (logoMode == LogoMode.imageOnly) {
       if (!hasImage) {
         return Center(
-          child: Icon(Icons.image_outlined, size: 48, color: textStyle.color?.withValues(alpha: 0.3)),
+          child: Icon(
+            Icons.image_outlined,
+            size: 48,
+            color: textStyle.color?.withValues(alpha: 0.3),
+          ),
         );
       }
       return Center(child: _buildImageWidget());
@@ -99,22 +100,18 @@ class LogoPreview extends StatelessWidget {
     final imageFlex = (imageFlexRatio * 100).round();
     final textFlex = 100 - imageFlex;
     final isVertical =
-        imagePosition == ImagePosition.top || imagePosition == ImagePosition.bottom;
+        imagePosition == ImagePosition.top ||
+        imagePosition == ImagePosition.bottom;
 
-    final imageWidget = Expanded(
-      flex: imageFlex,
-      child: _buildImageWidget(),
-    );
-    final textWidget = Expanded(
-      flex: textFlex,
-      child: _buildTextWidget(),
-    );
+    final imageWidget = Expanded(flex: imageFlex, child: _buildImageWidget());
+    final textWidget = Expanded(flex: textFlex, child: _buildTextWidget());
     final gap = SizedBox(
       width: isVertical ? null : imageGap,
       height: isVertical ? imageGap : null,
     );
 
-    final children = imagePosition == ImagePosition.bottom ||
+    final children =
+        imagePosition == ImagePosition.bottom ||
             imagePosition == ImagePosition.right
         ? [textWidget, gap, imageWidget]
         : [imageWidget, gap, textWidget];
@@ -126,11 +123,48 @@ class LogoPreview extends StatelessWidget {
     }
   }
 
+  Widget _buildCheckerboard() {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        const cellSize = 8.0;
+        return CustomPaint(
+          size: Size(constraints.maxWidth, constraints.maxHeight),
+          painter: _CheckerboardPainter(cellSize: cellSize),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final colors = context.tweakcnColors;
     final radius = context.tweakcnRadius;
     final shadows = context.tweakcnShadows;
+
+    final bgColor = transparentBackground
+        ? Colors.transparent
+        : backgroundColor;
+    final hasBorderRadius = exportBorderRadius > 0;
+
+    Widget innerContent = Container(
+      color: bgColor,
+      child: canvasPadding > 0
+          ? Center(
+              child: FractionallySizedBox(
+                widthFactor: (1.0 - canvasPadding).clamp(0.1, 1.0),
+                heightFactor: (1.0 - canvasPadding).clamp(0.1, 1.0),
+                child: _buildContent(),
+              ),
+            )
+          : _buildContent(),
+    );
+
+    if (hasBorderRadius) {
+      innerContent = ClipRRect(
+        borderRadius: BorderRadius.circular(exportBorderRadius),
+        child: innerContent,
+      );
+    }
 
     return Center(
       child: AspectRatio(
@@ -143,24 +177,39 @@ class LogoPreview extends StatelessWidget {
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(radius.lg),
-            child: RepaintBoundary(
-              key: repaintBoundaryKey,
-              child: Container(
-                color: backgroundColor,
-                child: canvasPadding > 0
-                    ? Center(
-                        child: FractionallySizedBox(
-                          widthFactor: (1.0 - canvasPadding).clamp(0.1, 1.0),
-                          heightFactor: (1.0 - canvasPadding).clamp(0.1, 1.0),
-                          child: _buildContent(),
-                        ),
-                      )
-                    : _buildContent(),
-              ),
+            child: Stack(
+              children: [
+                if (transparentBackground) _buildCheckerboard(),
+                RepaintBoundary(key: repaintBoundaryKey, child: innerContent),
+              ],
             ),
           ),
         ),
       ),
     );
   }
+}
+
+class _CheckerboardPainter extends CustomPainter {
+  final double cellSize;
+  _CheckerboardPainter({required this.cellSize});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final light = Paint()..color = Colors.white;
+    final dark = Paint()..color = const Color(0xFFE0E0E0);
+
+    for (double y = 0; y < size.height; y += cellSize) {
+      for (double x = 0; x < size.width; x += cellSize) {
+        final isEven = ((x ~/ cellSize) + (y ~/ cellSize)) % 2 == 0;
+        canvas.drawRect(
+          Rect.fromLTWH(x, y, cellSize, cellSize),
+          isEven ? light : dark,
+        );
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

@@ -160,6 +160,8 @@ class _LogoPageState extends ConsumerState<LogoPage> {
               imageFlexRatio: logo.imageFlexRatio,
               imageGap: logo.imageGap,
               imageFitMode: logo.imageFitMode,
+              transparentBackground: logo.transparentBackground,
+              exportBorderRadius: logo.exportBorderRadius,
             ),
           ),
         ],
@@ -233,7 +235,10 @@ class _LogoPageState extends ConsumerState<LogoPage> {
                 children: [
                   Text(
                     'Lines',
-                    style: TextStyle(color: colors.mutedForeground, fontSize: 12),
+                    style: TextStyle(
+                      color: colors.mutedForeground,
+                      fontSize: 12,
+                    ),
                   ),
                   const SizedBox(width: 8),
                   ...List.generate(3, (i) {
@@ -387,7 +392,10 @@ class _LogoPageState extends ConsumerState<LogoPage> {
                   width: 48,
                   child: Text(
                     'Canvas',
-                    style: TextStyle(color: colors.mutedForeground, fontSize: 12),
+                    style: TextStyle(
+                      color: colors.mutedForeground,
+                      fontSize: 12,
+                    ),
                   ),
                 ),
                 Expanded(
@@ -403,7 +411,10 @@ class _LogoPageState extends ConsumerState<LogoPage> {
                   width: 36,
                   child: Text(
                     '${(logo.canvasPadding * 100).round()}%',
-                    style: TextStyle(color: colors.mutedForeground, fontSize: 11),
+                    style: TextStyle(
+                      color: colors.mutedForeground,
+                      fontSize: 11,
+                    ),
                   ),
                 ),
               ],
@@ -415,7 +426,10 @@ class _LogoPageState extends ConsumerState<LogoPage> {
                     width: 48,
                     child: Text(
                       'Text',
-                      style: TextStyle(color: colors.mutedForeground, fontSize: 12),
+                      style: TextStyle(
+                        color: colors.mutedForeground,
+                        fontSize: 12,
+                      ),
                     ),
                   ),
                   Expanded(
@@ -431,22 +445,89 @@ class _LogoPageState extends ConsumerState<LogoPage> {
                     width: 36,
                     child: Text(
                       '${(logo.textPadding * 100).round()}%',
-                      style: TextStyle(color: colors.mutedForeground, fontSize: 11),
+                      style: TextStyle(
+                        color: colors.mutedForeground,
+                        fontSize: 11,
+                      ),
                     ),
                   ),
                 ],
               ),
+            Row(
+              children: [
+                SizedBox(
+                  width: 48,
+                  child: Text(
+                    'Radius',
+                    style: TextStyle(
+                      color: colors.mutedForeground,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: Slider(
+                    value: logo.exportBorderRadius,
+                    min: 0,
+                    max: 100,
+                    divisions: 20,
+                    onChanged: (v) => notifier.setExportBorderRadius(v),
+                  ),
+                ),
+                SizedBox(
+                  width: 36,
+                  child: Text(
+                    '${logo.exportBorderRadius.round()}',
+                    style: TextStyle(
+                      color: colors.mutedForeground,
+                      fontSize: 11,
+                    ),
+                  ),
+                ),
+              ],
+            ),
 
             _buildDivider(),
 
             // Colors
             _buildSectionLabel('COLORS', Icons.palette_outlined),
-            ColorPicker(
-              label: 'BG',
-              selected: logo.backgroundColor,
-              colors: LogoConstants.colors,
-              onSelect: (c) => notifier.setBackgroundColor(c),
+            Row(
+              children: [
+                SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: Checkbox(
+                    value: logo.transparentBackground,
+                    onChanged: (v) =>
+                        notifier.setTransparentBackground(v ?? false),
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    visualDensity: VisualDensity.compact,
+                  ),
+                ),
+                const SizedBox(width: 6),
+                GestureDetector(
+                  onTap: () => notifier.setTransparentBackground(
+                    !logo.transparentBackground,
+                  ),
+                  child: Text(
+                    'Transparent BG',
+                    style: TextStyle(
+                      color: colors.mutedForeground,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+              ],
             ),
+            const SizedBox(height: 8),
+            if (!logo.transparentBackground)
+              ColorPicker(
+                label: 'BG',
+                selected: logo.backgroundColor,
+                colors: LogoConstants.colors,
+                onSelect: (c) => notifier.setBackgroundColor(c),
+              ),
+            if (!logo.transparentBackground) const SizedBox(height: 8),
             const SizedBox(height: 8),
             ColorPicker(
               label: 'Text',
@@ -490,7 +571,10 @@ class _LogoPageState extends ConsumerState<LogoPage> {
                   padding: const EdgeInsets.only(right: 8),
                   child: Text(
                     'Format',
-                    style: TextStyle(color: colors.mutedForeground, fontSize: 12),
+                    style: TextStyle(
+                      color: colors.mutedForeground,
+                      fontSize: 12,
+                    ),
                   ),
                 ),
                 _buildOptionChip(
@@ -636,10 +720,7 @@ class _LogoPageState extends ConsumerState<LogoPage> {
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(radius.sm),
-                child: Image.memory(
-                  logo.imageBytes!,
-                  fit: BoxFit.cover,
-                ),
+                child: Image.memory(logo.imageBytes!, fit: BoxFit.cover),
               ),
             ),
             const SizedBox(width: 8),
@@ -664,7 +745,11 @@ class _LogoPageState extends ConsumerState<LogoPage> {
               height: 36,
               child: IconButton(
                 onPressed: () => notifier.clearImage(),
-                icon: Icon(Icons.close, size: 16, color: colors.mutedForeground),
+                icon: Icon(
+                  Icons.close,
+                  size: 16,
+                  color: colors.mutedForeground,
+                ),
                 tooltip: 'Remove image',
                 padding: EdgeInsets.zero,
                 style: IconButton.styleFrom(

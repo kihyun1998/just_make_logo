@@ -29,6 +29,8 @@ class LogoState {
   final double imageGap;
   final ImageFitMode imageFitMode;
   final LogoMode logoMode;
+  final bool transparentBackground;
+  final double exportBorderRadius;
 
   const LogoState({
     this.logoMode = LogoMode.textOnly,
@@ -48,11 +50,15 @@ class LogoState {
     this.imageFlexRatio = 0.5,
     this.imageGap = 8,
     this.imageFitMode = ImageFitMode.contain,
+    this.transparentBackground = false,
+    this.exportBorderRadius = 0.0,
   });
 
   bool get hasImage => imageBytes != null;
-  bool get showText => logoMode == LogoMode.textOnly || logoMode == LogoMode.textAndImage;
-  bool get showImage => logoMode == LogoMode.imageOnly || logoMode == LogoMode.textAndImage;
+  bool get showText =>
+      logoMode == LogoMode.textOnly || logoMode == LogoMode.textAndImage;
+  bool get showImage =>
+      logoMode == LogoMode.imageOnly || logoMode == LogoMode.textAndImage;
 
   LogoState copyWith({
     LogoMode? logoMode,
@@ -72,6 +78,8 @@ class LogoState {
     double? imageFlexRatio,
     double? imageGap,
     ImageFitMode? imageFitMode,
+    bool? transparentBackground,
+    double? exportBorderRadius,
   }) {
     return LogoState(
       logoMode: logoMode ?? this.logoMode,
@@ -93,6 +101,9 @@ class LogoState {
       imageFlexRatio: imageFlexRatio ?? this.imageFlexRatio,
       imageGap: imageGap ?? this.imageGap,
       imageFitMode: imageFitMode ?? this.imageFitMode,
+      transparentBackground:
+          transparentBackground ?? this.transparentBackground,
+      exportBorderRadius: exportBorderRadius ?? this.exportBorderRadius,
     );
   }
 }

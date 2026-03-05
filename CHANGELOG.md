@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.10.0
+
+### Features
+- Transparent background option (PNG export)
+- Border radius option for rounded corner export
+
 ## 0.9.0
 
 ### Features

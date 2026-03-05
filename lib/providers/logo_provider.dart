@@ -108,7 +108,8 @@ class LogoNotifier extends _$LogoNotifier {
   }
 
   void setExportFormat(ExportFormat format) {
-    if (format == ExportFormat.svg && state.logoMode != LogoMode.textOnly) return;
+    if (format == ExportFormat.svg && state.logoMode != LogoMode.textOnly)
+      return;
     if (format == ExportFormat.svg) {
       state = state.copyWith(exportFormat: format, exportScale: 1);
     } else {
@@ -142,6 +143,14 @@ class LogoNotifier extends _$LogoNotifier {
 
   void setImageFitMode(ImageFitMode mode) {
     state = state.copyWith(imageFitMode: mode);
+  }
+
+  void setTransparentBackground(bool value) {
+    state = state.copyWith(transparentBackground: value);
+  }
+
+  void setExportBorderRadius(double radius) {
+    state = state.copyWith(exportBorderRadius: radius.clamp(0, 100));
   }
 
   void clearImage() {
