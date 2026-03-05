@@ -71,6 +71,14 @@ class LogoNotifier extends _$LogoNotifier {
     );
   }
 
+  void setLogoMode(LogoMode mode) {
+    state = state.copyWith(logoMode: mode);
+    // imageOnly or textAndImage needs image — if no image, SVG not available
+    if (mode != LogoMode.textOnly && state.exportFormat == ExportFormat.svg) {
+      state = state.copyWith(exportFormat: ExportFormat.png);
+    }
+  }
+
   void setFont(String font) {
     state = state.copyWith(selectedFont: font);
   }
@@ -100,7 +108,7 @@ class LogoNotifier extends _$LogoNotifier {
   }
 
   void setExportFormat(ExportFormat format) {
-    if (format == ExportFormat.svg && state.hasImage) return;
+    if (format == ExportFormat.svg && state.logoMode != LogoMode.textOnly) return;
     if (format == ExportFormat.svg) {
       state = state.copyWith(exportFormat: format, exportScale: 1);
     } else {
@@ -118,9 +126,6 @@ class LogoNotifier extends _$LogoNotifier {
 
   void setImageBytes(Uint8List? bytes) {
     state = state.copyWith(imageBytes: bytes);
-    if (bytes != null && state.exportFormat == ExportFormat.svg) {
-      state = state.copyWith(exportFormat: ExportFormat.png);
-    }
   }
 
   void setImagePosition(ImagePosition pos) {

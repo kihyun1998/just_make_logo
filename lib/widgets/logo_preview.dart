@@ -6,6 +6,7 @@ import '../models/logo_state.dart';
 import '../theme/tweakcn_theme.g.dart';
 
 class LogoPreview extends StatelessWidget {
+  final LogoMode logoMode;
   final String text;
   final TextStyle textStyle;
   final Color backgroundColor;
@@ -21,6 +22,7 @@ class LogoPreview extends StatelessWidget {
 
   const LogoPreview({
     super.key,
+    required this.logoMode,
     required this.text,
     required this.textStyle,
     required this.backgroundColor,
@@ -72,16 +74,25 @@ class LogoPreview extends StatelessWidget {
 
   Widget _buildContent() {
     final hasImage = imageBytes != null;
-    final hasText = text.isNotEmpty;
 
-    // No image: original text-only layout
-    if (!hasImage) {
+    // Text only mode
+    if (logoMode == LogoMode.textOnly) {
       return _buildTextWidget();
     }
 
-    // Image only, no text
-    if (!hasText) {
+    // Image only mode
+    if (logoMode == LogoMode.imageOnly) {
+      if (!hasImage) {
+        return Center(
+          child: Icon(Icons.image_outlined, size: 48, color: textStyle.color?.withValues(alpha: 0.3)),
+        );
+      }
       return Center(child: _buildImageWidget());
+    }
+
+    // Text + Image mode
+    if (!hasImage) {
+      return _buildTextWidget();
     }
 
     // Both image and text: flex layout

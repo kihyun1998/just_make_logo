@@ -147,6 +147,7 @@ class _LogoPageState extends ConsumerState<LogoPage> {
           // Preview
           Expanded(
             child: LogoPreview(
+              logoMode: logo.logoMode,
               text: _controller.text,
               textStyle: getFontStyle(logo.selectedFont, 120, logo.textColor),
               backgroundColor: logo.backgroundColor,
@@ -183,113 +184,142 @@ class _LogoPageState extends ConsumerState<LogoPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Image
-            _buildSectionLabel('IMAGE', Icons.image_outlined),
-            _buildImageControls(logo, notifier),
+            // Mode selector
+            _buildSectionLabel('MODE', Icons.dashboard_outlined),
+            Wrap(
+              spacing: 0,
+              runSpacing: 4,
+              children: [
+                _buildOptionChip(
+                  'Text Only',
+                  isSelected: logo.logoMode == LogoMode.textOnly,
+                  onTap: () => notifier.setLogoMode(LogoMode.textOnly),
+                ),
+                _buildOptionChip(
+                  'Image Only',
+                  isSelected: logo.logoMode == LogoMode.imageOnly,
+                  onTap: () => notifier.setLogoMode(LogoMode.imageOnly),
+                ),
+                _buildOptionChip(
+                  'Text + Image',
+                  isSelected: logo.logoMode == LogoMode.textAndImage,
+                  onTap: () => notifier.setLogoMode(LogoMode.textAndImage),
+                ),
+              ],
+            ),
 
             _buildDivider(),
 
-            // Text input
-            _buildSectionLabel('TEXT', Icons.text_fields),
-            TextField(
-              controller: _controller,
-              style: TextStyle(color: colors.foreground, fontSize: 15),
-              decoration: _inputDecoration('Enter text'),
-              maxLines: logo.maxLines,
-              onChanged: (_) => setState(() {}),
-            ),
-            const SizedBox(height: 6),
-            // Line count
-            Row(
-              children: [
-                Text(
-                  'Lines',
-                  style: TextStyle(color: colors.mutedForeground, fontSize: 12),
-                ),
-                const SizedBox(width: 8),
-                ...List.generate(3, (i) {
-                  final n = i + 1;
-                  final isSelected = logo.maxLines == n;
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 4),
-                    child: GestureDetector(
-                      onTap: () => notifier.setMaxLines(n),
-                      child: Container(
-                        width: 28,
-                        height: 28,
-                        decoration: BoxDecoration(
-                          color: isSelected
-                              ? colors.primary
-                              : Colors.transparent,
-                          borderRadius: BorderRadius.circular(radius.sm),
-                          border: isSelected
-                              ? null
-                              : Border.all(color: colors.border),
-                        ),
-                        alignment: Alignment.center,
-                        child: Text(
-                          '$n',
-                          style: TextStyle(
+            // Image (shown for imageOnly and textAndImage)
+            if (logo.showImage) ...[
+              _buildSectionLabel('IMAGE', Icons.image_outlined),
+              _buildImageControls(logo, notifier),
+              _buildDivider(),
+            ],
+
+            // Text input (shown for textOnly and textAndImage)
+            if (logo.showText) ...[
+              _buildSectionLabel('TEXT', Icons.text_fields),
+              TextField(
+                controller: _controller,
+                style: TextStyle(color: colors.foreground, fontSize: 15),
+                decoration: _inputDecoration('Enter text'),
+                maxLines: logo.maxLines,
+                onChanged: (_) => setState(() {}),
+              ),
+              const SizedBox(height: 6),
+              // Line count
+              Row(
+                children: [
+                  Text(
+                    'Lines',
+                    style: TextStyle(color: colors.mutedForeground, fontSize: 12),
+                  ),
+                  const SizedBox(width: 8),
+                  ...List.generate(3, (i) {
+                    final n = i + 1;
+                    final isSelected = logo.maxLines == n;
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 4),
+                      child: GestureDetector(
+                        onTap: () => notifier.setMaxLines(n),
+                        child: Container(
+                          width: 28,
+                          height: 28,
+                          decoration: BoxDecoration(
                             color: isSelected
-                                ? colors.primaryForeground
-                                : colors.mutedForeground,
-                            fontSize: 12,
-                            fontWeight: isSelected
-                                ? FontWeight.w600
-                                : FontWeight.normal,
+                                ? colors.primary
+                                : Colors.transparent,
+                            borderRadius: BorderRadius.circular(radius.sm),
+                            border: isSelected
+                                ? null
+                                : Border.all(color: colors.border),
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            '$n',
+                            style: TextStyle(
+                              color: isSelected
+                                  ? colors.primaryForeground
+                                  : colors.mutedForeground,
+                              fontSize: 12,
+                              fontWeight: isSelected
+                                  ? FontWeight.w600
+                                  : FontWeight.normal,
+                            ),
                           ),
                         ),
                       ),
+                    );
+                  }),
+                ],
+              ),
+
+              _buildDivider(),
+
+              // Font
+              _buildSectionLabel('FONT', Icons.font_download_outlined),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextOnlyDropdownButton(
+                      items: LogoConstants.fonts,
+                      value: logo.selectedFont,
+                      hint: 'Font',
+                      width: double.infinity,
+                      onChanged: (value) {
+                        if (value != null) {
+                          notifier.setFont(value);
+                        }
+                      },
                     ),
-                  );
-                }),
-              ],
-            ),
-
-            _buildDivider(),
-
-            // Font
-            _buildSectionLabel('FONT', Icons.font_download_outlined),
-            Row(
-              children: [
-                Expanded(
-                  child: TextOnlyDropdownButton(
-                    items: LogoConstants.fonts,
-                    value: logo.selectedFont,
-                    hint: 'Font',
-                    width: double.infinity,
-                    onChanged: (value) {
-                      if (value != null) {
-                        notifier.setFont(value);
-                      }
-                    },
                   ),
-                ),
-                const SizedBox(width: 6),
-                SizedBox(
-                  width: 36,
-                  height: 36,
-                  child: IconButton(
-                    onPressed: _handleFontInstall,
-                    icon: Icon(
-                      Icons.open_in_new,
-                      size: 16,
-                      color: colors.mutedForeground,
-                    ),
-                    tooltip: 'Download font from Google Fonts',
-                    padding: EdgeInsets.zero,
-                    style: IconButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(radius.sm),
-                        side: BorderSide(color: colors.border),
+                  const SizedBox(width: 6),
+                  SizedBox(
+                    width: 36,
+                    height: 36,
+                    child: IconButton(
+                      onPressed: _handleFontInstall,
+                      icon: Icon(
+                        Icons.open_in_new,
+                        size: 16,
+                        color: colors.mutedForeground,
+                      ),
+                      tooltip: 'Download font from Google Fonts',
+                      padding: EdgeInsets.zero,
+                      style: IconButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(radius.sm),
+                          side: BorderSide(color: colors.border),
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
 
-            _buildDivider(),
+              _buildDivider(),
+            ],
 
             // Size
             _buildSectionLabel('SIZE', Icons.aspect_ratio),
@@ -378,33 +408,34 @@ class _LogoPageState extends ConsumerState<LogoPage> {
                 ),
               ],
             ),
-            Row(
-              children: [
-                SizedBox(
-                  width: 48,
-                  child: Text(
-                    'Text',
-                    style: TextStyle(color: colors.mutedForeground, fontSize: 12),
+            if (logo.showText)
+              Row(
+                children: [
+                  SizedBox(
+                    width: 48,
+                    child: Text(
+                      'Text',
+                      style: TextStyle(color: colors.mutedForeground, fontSize: 12),
+                    ),
                   ),
-                ),
-                Expanded(
-                  child: Slider(
-                    value: logo.textPadding,
-                    min: 0.0,
-                    max: 0.9,
-                    divisions: 18,
-                    onChanged: (v) => notifier.setTextPadding(v),
+                  Expanded(
+                    child: Slider(
+                      value: logo.textPadding,
+                      min: 0.0,
+                      max: 0.9,
+                      divisions: 18,
+                      onChanged: (v) => notifier.setTextPadding(v),
+                    ),
                   ),
-                ),
-                SizedBox(
-                  width: 36,
-                  child: Text(
-                    '${(logo.textPadding * 100).round()}%',
-                    style: TextStyle(color: colors.mutedForeground, fontSize: 11),
+                  SizedBox(
+                    width: 36,
+                    child: Text(
+                      '${(logo.textPadding * 100).round()}%',
+                      style: TextStyle(color: colors.mutedForeground, fontSize: 11),
+                    ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
 
             _buildDivider(),
 
@@ -476,7 +507,7 @@ class _LogoPageState extends ConsumerState<LogoPage> {
                   'SVG',
                   isSelected: logo.exportFormat == ExportFormat.svg,
                   onTap: () => notifier.setExportFormat(ExportFormat.svg),
-                  disabled: logo.hasImage,
+                  disabled: logo.logoMode != LogoMode.textOnly,
                 ),
               ],
             ),

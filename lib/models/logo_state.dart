@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import '../utils/export_utils.dart';
 import 'color_preset.dart';
 
+enum LogoMode { textOnly, imageOnly, textAndImage }
+
 enum ImagePosition { top, bottom, left, right }
 
 enum ImageFitMode { contain, cover, fill }
@@ -26,8 +28,10 @@ class LogoState {
   final double imageFlexRatio;
   final double imageGap;
   final ImageFitMode imageFitMode;
+  final LogoMode logoMode;
 
   const LogoState({
+    this.logoMode = LogoMode.textOnly,
     this.selectedFont = 'Workbench',
     this.backgroundColor = Colors.white,
     this.textColor = Colors.black,
@@ -47,8 +51,11 @@ class LogoState {
   });
 
   bool get hasImage => imageBytes != null;
+  bool get showText => logoMode == LogoMode.textOnly || logoMode == LogoMode.textAndImage;
+  bool get showImage => logoMode == LogoMode.imageOnly || logoMode == LogoMode.textAndImage;
 
   LogoState copyWith({
+    LogoMode? logoMode,
     String? selectedFont,
     Color? backgroundColor,
     Color? textColor,
@@ -67,6 +74,7 @@ class LogoState {
     ImageFitMode? imageFitMode,
   }) {
     return LogoState(
+      logoMode: logoMode ?? this.logoMode,
       selectedFont: selectedFont ?? this.selectedFont,
       backgroundColor: backgroundColor ?? this.backgroundColor,
       textColor: textColor ?? this.textColor,
