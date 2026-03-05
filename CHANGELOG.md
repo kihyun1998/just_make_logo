@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.0.0
+## 0.9.0
 
 ### Features
 - Logo mode selection (Text Only / Image Only / Text + Image)
