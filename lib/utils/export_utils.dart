@@ -110,6 +110,72 @@ class ExportUtils {
         '${b.toRadixString(16).padLeft(2, '0')}';
   }
 
+  static String _wrapSvg({
+    required String innerSvg,
+    required int width,
+    required int height,
+    required Color backgroundColor,
+    required double canvasPadding,
+    required double borderRadius,
+    required bool transparentBackground,
+  }) {
+    final scale = (1.0 - canvasPadding).clamp(0.1, 1.0);
+    final innerW = (width * scale).round();
+    final innerH = (height * scale).round();
+    final x = ((width - innerW) / 2).round();
+    final y = ((height - innerH) / 2).round();
+
+    final buf = StringBuffer();
+    buf.writeln('<?xml version="1.0" encoding="UTF-8"?>');
+    buf.writeln(
+      '<svg xmlns="http://www.w3.org/2000/svg" '
+      'xmlns:xlink="http://www.w3.org/1999/xlink" '
+      'width="$width" height="$height" '
+      'viewBox="0 0 $width $height">',
+    );
+
+    // Background
+    if (!transparentBackground) {
+      final bgHex = _colorToHex(backgroundColor);
+      if (borderRadius > 0) {
+        buf.writeln(
+          '  <rect width="$width" height="$height" '
+          'rx="$borderRadius" ry="$borderRadius" fill="$bgHex"/>',
+        );
+      } else {
+        buf.writeln('  <rect width="$width" height="$height" fill="$bgHex"/>');
+      }
+    }
+
+    // Clip with border radius if needed
+    if (borderRadius > 0) {
+      buf.writeln('  <defs>');
+      buf.writeln('    <clipPath id="clip">');
+      buf.writeln(
+        '      <rect width="$width" height="$height" '
+        'rx="$borderRadius" ry="$borderRadius"/>',
+      );
+      buf.writeln('    </clipPath>');
+      buf.writeln('  </defs>');
+      buf.writeln('  <g clip-path="url(#clip)">');
+    }
+
+    // Inner SVG centered with padding — preserve original attributes (viewBox, fill, etc.)
+    var inner = innerSvg.replaceAll(RegExp(r'<\?xml[^?]*\?>'), '').trim();
+    // Replace width/height/x/y on the original <svg> tag
+    inner = inner.replaceFirst(RegExp(r'<svg\b'), '<svg x="$x" y="$y"');
+    inner = inner.replaceAll(RegExp(r'\s*width="[^"]*"'), ' width="$innerW"');
+    inner = inner.replaceAll(RegExp(r'\s*height="[^"]*"'), ' height="$innerH"');
+    buf.writeln(inner);
+
+    if (borderRadius > 0) {
+      buf.writeln('  </g>');
+    }
+
+    buf.writeln('</svg>');
+    return buf.toString();
+  }
+
   static String _escapeXml(String text) {
     return text
         .replaceAll('&', '&amp;')
@@ -126,13 +192,17 @@ class ExportUtils {
     required int targetWidth,
     required int targetHeight,
     required int scale,
-    // For SVG
+    // For SVG (text mode)
     String? text,
     Color? backgroundColor,
     Color? textColor,
     String? fontFamily,
     double? canvasPadding,
     double? textPadding,
+    // For SVG (svg upload mode)
+    String? svgString,
+    double? borderRadius,
+    bool? transparentBg,
   }) async {
     final ext = format.name;
     final scaleLabel = (format != ExportFormat.svg && scale > 1)
@@ -174,16 +244,29 @@ class ExportUtils {
         final bytes = await _toJpg(image);
         await file.writeAsBytes(bytes);
       case ExportFormat.svg:
-        final svgContent = _toSvg(
-          text: text!,
-          width: targetWidth,
-          height: targetHeight,
-          backgroundColor: backgroundColor!,
-          textColor: textColor!,
-          fontFamily: fontFamily!,
-          canvasPadding: canvasPadding!,
-          textPadding: textPadding!,
-        );
+        final String svgContent;
+        if (svgString != null) {
+          svgContent = _wrapSvg(
+            innerSvg: svgString,
+            width: targetWidth,
+            height: targetHeight,
+            backgroundColor: backgroundColor!,
+            canvasPadding: canvasPadding ?? 0.0,
+            borderRadius: borderRadius ?? 0.0,
+            transparentBackground: transparentBg ?? false,
+          );
+        } else {
+          svgContent = _toSvg(
+            text: text!,
+            width: targetWidth,
+            height: targetHeight,
+            backgroundColor: backgroundColor!,
+            textColor: textColor!,
+            fontFamily: fontFamily!,
+            canvasPadding: canvasPadding!,
+            textPadding: textPadding!,
+          );
+        }
         await file.writeAsString(svgContent);
     }
 

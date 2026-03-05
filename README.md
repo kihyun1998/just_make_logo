@@ -4,10 +4,11 @@ A simple logo maker built with Flutter. Create logos with text, images, or both 
 
 ## Features
 
-- **Logo Modes** — Text Only, Image Only, or Text + Image
+- **Logo Modes** — Text Only, Image Only, Text + Image, or SVG Only
 - **Font Selection** — 7 built-in fonts (Bebas Neue, Pacifico, Lobster, Raleway, Permanent Marker, Black Han Sans, Noto Sans KR)
 - **Color Customization** — Custom color picker with preset save/load
 - **Image Support** — Insert images with layout, ratio, gap, and fit controls; Image Only mode fills canvas with padding control
+- **SVG Upload** — Upload SVG files and export as vector SVG with background, padding, and border radius applied
 - **Canvas Options** — Size presets (16x16 ~ 1920x1080, including 16:9), padding, border radius
 - **Transparent Background** — PNG export with transparency (checkerboard preview)
 - **Export** — PNG, JPG, SVG with scale options

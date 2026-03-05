@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.12.0
+
+### Features
+- SVG Only mode — upload SVG files and export as vector SVG (with background, padding, border radius preserved)
+- SVG upload also supports PNG/JPG rasterized export via canvas capture
+
 ## 0.11.2
 
 ### Improvements

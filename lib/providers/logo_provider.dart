@@ -73,8 +73,10 @@ class LogoNotifier extends _$LogoNotifier {
 
   void setLogoMode(LogoMode mode) {
     state = state.copyWith(logoMode: mode);
-    // imageOnly or textAndImage needs image — if no image, SVG not available
-    if (mode != LogoMode.textOnly && state.exportFormat == ExportFormat.svg) {
+    // SVG export only allowed for textOnly and svgOnly
+    if (mode != LogoMode.textOnly &&
+        mode != LogoMode.svgOnly &&
+        state.exportFormat == ExportFormat.svg) {
       state = state.copyWith(exportFormat: ExportFormat.png);
     }
   }
@@ -108,7 +110,9 @@ class LogoNotifier extends _$LogoNotifier {
   }
 
   void setExportFormat(ExportFormat format) {
-    if (format == ExportFormat.svg && state.logoMode != LogoMode.textOnly) {
+    if (format == ExportFormat.svg &&
+        state.logoMode != LogoMode.textOnly &&
+        state.logoMode != LogoMode.svgOnly) {
       return;
     }
     if (format == ExportFormat.svg) {
@@ -152,6 +156,14 @@ class LogoNotifier extends _$LogoNotifier {
 
   void setExportBorderRadius(double radius) {
     state = state.copyWith(exportBorderRadius: radius.clamp(0, 100));
+  }
+
+  void setSvgString(String? svg) {
+    state = state.copyWith(svgString: svg);
+  }
+
+  void clearSvg() {
+    state = state.copyWith(svgString: null);
   }
 
   void clearImage() {

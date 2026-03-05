@@ -2,6 +2,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dropdown_button/flutter_dropdown_button.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../constants/logo_constants.dart';
@@ -206,6 +207,7 @@ class _LogoPageState extends ConsumerState<LogoPage> {
               aspectRatio: aspectRatio,
               repaintBoundaryKey: _repaintBoundaryKey,
               imageBytes: logo.imageBytes,
+              svgString: logo.svgString,
               imagePosition: logo.imagePosition,
               imageFlexRatio: logo.imageFlexRatio,
               imageGap: logo.imageGap,
@@ -257,10 +259,22 @@ class _LogoPageState extends ConsumerState<LogoPage> {
                   isSelected: logo.logoMode == LogoMode.textAndImage,
                   onTap: () => notifier.setLogoMode(LogoMode.textAndImage),
                 ),
+                _buildOptionChip(
+                  'SVG Only',
+                  isSelected: logo.logoMode == LogoMode.svgOnly,
+                  onTap: () => notifier.setLogoMode(LogoMode.svgOnly),
+                ),
               ],
             ),
 
             _buildDivider(),
+
+            // SVG (shown for svgOnly)
+            if (logo.showSvg) ...[
+              _buildSectionLabel('SVG', Icons.data_object),
+              _buildSvgControls(logo, notifier),
+              _buildDivider(),
+            ],
 
             // Image (shown for imageOnly and textAndImage)
             if (logo.showImage) ...[
@@ -582,13 +596,15 @@ class _LogoPageState extends ConsumerState<LogoPage> {
                 onSelect: (c) => notifier.setBackgroundColor(c),
               ),
             if (!logo.transparentBackground) const SizedBox(height: 8),
-            const SizedBox(height: 8),
-            ColorPicker(
-              label: 'Text',
-              selected: logo.textColor,
-              colors: LogoConstants.colors,
-              onSelect: (c) => notifier.setTextColor(c),
-            ),
+            if (logo.showText) ...[
+              const SizedBox(height: 8),
+              ColorPicker(
+                label: 'Text',
+                selected: logo.textColor,
+                colors: LogoConstants.colors,
+                onSelect: (c) => notifier.setTextColor(c),
+              ),
+            ],
 
             const SizedBox(height: 12),
             Row(
@@ -645,7 +661,9 @@ class _LogoPageState extends ConsumerState<LogoPage> {
                   'SVG',
                   isSelected: logo.exportFormat == ExportFormat.svg,
                   onTap: () => notifier.setExportFormat(ExportFormat.svg),
-                  disabled: logo.logoMode != LogoMode.textOnly,
+                  disabled:
+                      logo.logoMode != LogoMode.textOnly &&
+                      logo.logoMode != LogoMode.svgOnly,
                 ),
               ],
             ),
@@ -945,6 +963,85 @@ class _LogoPageState extends ConsumerState<LogoPage> {
     );
   }
 
+  Widget _buildSvgControls(LogoState logo, LogoNotifier notifier) {
+    final colors = context.tweakcnColors;
+    final radius = context.tweakcnRadius;
+
+    if (!logo.hasSvg) {
+      return SizedBox(
+        width: double.infinity,
+        child: OutlinedButton.icon(
+          onPressed: () => _handlePickSvg(notifier),
+          style: OutlinedButton.styleFrom(
+            foregroundColor: colors.mutedForeground,
+            side: BorderSide(color: colors.border),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(radius.sm),
+            ),
+            padding: const EdgeInsets.symmetric(vertical: 10),
+          ),
+          icon: const Icon(Icons.upload_file, size: 16),
+          label: const Text('Select SVG File', style: TextStyle(fontSize: 12)),
+        ),
+      );
+    }
+
+    return Row(
+      children: [
+        Container(
+          width: 48,
+          height: 48,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(radius.sm),
+            border: Border.all(color: colors.border),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(radius.sm),
+            child: SvgPicture.string(logo.svgString!, fit: BoxFit.contain),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: OutlinedButton.icon(
+            onPressed: () => _handlePickSvg(notifier),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: colors.mutedForeground,
+              side: BorderSide(color: colors.border),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(radius.sm),
+              ),
+              padding: const EdgeInsets.symmetric(vertical: 8),
+            ),
+            icon: const Icon(Icons.swap_horiz, size: 14),
+            label: const Text('Change', style: TextStyle(fontSize: 11)),
+          ),
+        ),
+        const SizedBox(width: 4),
+        SizedBox(
+          width: 36,
+          height: 36,
+          child: IconButton(
+            onPressed: () => notifier.clearSvg(),
+            icon: Icon(Icons.close, size: 16, color: colors.mutedForeground),
+            padding: EdgeInsets.zero,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _handlePickSvg(LogoNotifier notifier) async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['svg'],
+      withData: true,
+    );
+    if (result != null && result.files.single.bytes != null) {
+      final svgContent = String.fromCharCodes(result.files.single.bytes!);
+      notifier.setSvgString(svgContent);
+    }
+  }
+
   Future<void> _handlePickImage(LogoNotifier notifier) async {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.image,
@@ -1146,6 +1243,9 @@ class _LogoPageState extends ConsumerState<LogoPage> {
         fontFamily: logo.selectedFont,
         canvasPadding: logo.canvasPadding,
         textPadding: logo.textPadding,
+        svgString: logo.svgString,
+        borderRadius: logo.exportBorderRadius,
+        transparentBg: logo.transparentBackground,
       );
 
       if (mounted) {

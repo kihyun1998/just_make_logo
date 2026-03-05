@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../models/logo_state.dart';
 import '../theme/tweakcn_theme.g.dart';
@@ -15,6 +16,7 @@ class LogoPreview extends StatelessWidget {
   final double aspectRatio;
   final GlobalKey? repaintBoundaryKey;
   final Uint8List? imageBytes;
+  final String? svgString;
   final ImagePosition imagePosition;
   final double imageFlexRatio;
   final double imageGap;
@@ -33,6 +35,7 @@ class LogoPreview extends StatelessWidget {
     required this.aspectRatio,
     this.repaintBoundaryKey,
     this.imageBytes,
+    this.svgString,
     this.imagePosition = ImagePosition.top,
     this.imageFlexRatio = 0.5,
     this.imageGap = 8,
@@ -71,6 +74,22 @@ class LogoPreview extends StatelessWidget {
 
   Widget _buildContent() {
     final hasImage = imageBytes != null;
+
+    // SVG only mode
+    if (logoMode == LogoMode.svgOnly) {
+      if (svgString == null) {
+        return Center(
+          child: Icon(
+            Icons.data_object,
+            size: 48,
+            color: textStyle.color?.withValues(alpha: 0.3),
+          ),
+        );
+      }
+      return SizedBox.expand(
+        child: SvgPicture.string(svgString!, fit: BoxFit.contain),
+      );
+    }
 
     // Text only mode
     if (logoMode == LogoMode.textOnly) {

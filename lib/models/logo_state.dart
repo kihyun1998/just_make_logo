@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import '../utils/export_utils.dart';
 import 'color_preset.dart';
 
-enum LogoMode { textOnly, imageOnly, textAndImage }
+enum LogoMode { textOnly, imageOnly, textAndImage, svgOnly }
 
 enum ImagePosition { top, bottom, left, right }
 
@@ -29,6 +29,7 @@ class LogoState {
   final double imageGap;
   final ImageFitMode imageFitMode;
   final LogoMode logoMode;
+  final String? svgString;
   final bool transparentBackground;
   final double exportBorderRadius;
 
@@ -50,15 +51,18 @@ class LogoState {
     this.imageFlexRatio = 0.5,
     this.imageGap = 8,
     this.imageFitMode = ImageFitMode.contain,
+    this.svgString,
     this.transparentBackground = false,
     this.exportBorderRadius = 0.0,
   });
 
   bool get hasImage => imageBytes != null;
+  bool get hasSvg => svgString != null;
   bool get showText =>
       logoMode == LogoMode.textOnly || logoMode == LogoMode.textAndImage;
   bool get showImage =>
       logoMode == LogoMode.imageOnly || logoMode == LogoMode.textAndImage;
+  bool get showSvg => logoMode == LogoMode.svgOnly;
 
   LogoState copyWith({
     LogoMode? logoMode,
@@ -74,6 +78,7 @@ class LogoState {
     bool? isExporting,
     List<ColorPreset>? colorPresets,
     Object? imageBytes = _sentinel,
+    Object? svgString = _sentinel,
     ImagePosition? imagePosition,
     double? imageFlexRatio,
     double? imageGap,
@@ -101,6 +106,7 @@ class LogoState {
       imageFlexRatio: imageFlexRatio ?? this.imageFlexRatio,
       imageGap: imageGap ?? this.imageGap,
       imageFitMode: imageFitMode ?? this.imageFitMode,
+      svgString: svgString == _sentinel ? this.svgString : svgString as String?,
       transparentBackground:
           transparentBackground ?? this.transparentBackground,
       exportBorderRadius: exportBorderRadius ?? this.exportBorderRadius,
