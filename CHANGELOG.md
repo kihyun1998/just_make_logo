@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.11.1
+
+### Improvements
+- Added small size presets: 16x16, 32x32, 48x48, 96x96, 128x128, 256x256
+
 ## 0.11.0
 
 ### Improvements
