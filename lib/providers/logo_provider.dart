@@ -108,8 +108,9 @@ class LogoNotifier extends _$LogoNotifier {
   }
 
   void setExportFormat(ExportFormat format) {
-    if (format == ExportFormat.svg && state.logoMode != LogoMode.textOnly)
+    if (format == ExportFormat.svg && state.logoMode != LogoMode.textOnly) {
       return;
+    }
     if (format == ExportFormat.svg) {
       state = state.copyWith(exportFormat: format, exportScale: 1);
     } else {

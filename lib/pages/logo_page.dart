@@ -14,7 +14,6 @@ import '../utils/font_installer.dart';
 import '../utils/font_utils.dart';
 import '../widgets/color_picker.dart';
 import '../widgets/color_preset_sheet.dart';
-import '../widgets/font_scale_control.dart';
 import '../widgets/logo_preview.dart';
 
 class LogoPage extends ConsumerStatefulWidget {
