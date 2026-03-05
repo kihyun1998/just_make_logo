@@ -1,5 +1,5 @@
 name: just_make_logo
-description: "A new Flutter project."
+description: "A simple logo maker. Create logos with text, images, or both."
 
 publish_to: "none"
 

@@ -1,16 +1,31 @@
-# just_make_logo
+# Just Make Logo
 
-A new Flutter project.
+A simple logo maker built with Flutter. Create logos with text, images, or both — customize fonts, colors, layout, and export in multiple formats.
+
+## Features
+
+- **Logo Modes** — Text Only, Image Only, or Text + Image
+- **Font Selection** — 7 built-in fonts (Bebas Neue, Pacifico, Lobster, Raleway, Permanent Marker, Black Han Sans, Noto Sans KR)
+- **Color Customization** — Custom color picker with preset save/load
+- **Image Support** — Insert images with layout, ratio, gap, and fit controls
+- **Canvas Options** — Size presets (including 16:9), padding control
+- **Export** — PNG, JPG, SVG with scale options
+- **Dark Mode** — TweakcnTheme dark UI
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+### Prerequisites
 
-A few resources to get you started if this is your first Flutter project:
+- Flutter SDK ^3.9.2
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+### Run
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+```bash
+flutter pub get
+dart run build_runner build
+flutter run
+```
+
+## License
+
+This project is licensed under the MIT License.
