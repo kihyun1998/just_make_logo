@@ -6,6 +6,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../constants/logo_constants.dart';
+import '../models/group_preset.dart';
 import '../models/logo_state.dart';
 import '../providers/logo_provider.dart';
 import '../providers/theme_provider.dart';
@@ -746,6 +747,31 @@ class _LogoPageState extends ConsumerState<LogoPage> {
                 ),
               ),
             ),
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: logo.isExporting
+                    ? null
+                    : () => _showGroupExportSheet(),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: colors.foreground,
+                  side: BorderSide(color: colors.border),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(radius.md),
+                  ),
+                ),
+                icon: const Icon(Icons.folder_zip_outlined, size: 18),
+                label: const Text(
+                  'Group Export',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -1222,6 +1248,167 @@ class _LogoPageState extends ConsumerState<LogoPage> {
   Future<void> _handleFontInstall() async {
     final font = ref.read(logoNotifierProvider).selectedFont;
     await FontInstaller.openGoogleFontsPage(font);
+  }
+
+  void _showGroupExportSheet() {
+    final colors = context.tweakcnColors;
+    final radius = context.tweakcnRadius;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        return Container(
+          constraints: const BoxConstraints(maxHeight: 400),
+          decoration: BoxDecoration(
+            color: colors.card,
+            borderRadius: const BorderRadius.vertical(
+              top: Radius.circular(16),
+            ),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Handle bar
+              Container(
+                margin: const EdgeInsets.only(top: 12),
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: colors.muted,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.folder_zip_outlined,
+                      size: 18,
+                      color: colors.foreground,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Group Export',
+                      style: TextStyle(
+                        color: colors.foreground,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Divider(height: 1, color: colors.border),
+              Flexible(
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  itemCount: LogoConstants.groupPresets.length,
+                  itemBuilder: (context, index) {
+                    final group = LogoConstants.groupPresets[index];
+                    final iconData = switch (group.icon) {
+                      IconLabel.android => Icons.android,
+                      IconLabel.apple => Icons.apple,
+                      IconLabel.web => Icons.language,
+                      IconLabel.windows => Icons.window,
+                    };
+                    final sizesSummary = group.sizes
+                        .map((s) => '${s.width}x${s.height}')
+                        .join(', ');
+
+                    return ListTile(
+                      leading: Icon(iconData, color: colors.foreground),
+                      title: Text(
+                        group.label,
+                        style: TextStyle(
+                          color: colors.foreground,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      subtitle: Text(
+                        '${group.sizes.length} sizes: $sizesSummary',
+                        style: TextStyle(
+                          color: colors.mutedForeground,
+                          fontSize: 11,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      trailing: Icon(
+                        Icons.download_outlined,
+                        size: 20,
+                        color: colors.mutedForeground,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(radius.sm),
+                      ),
+                      onTap: () {
+                        Navigator.pop(ctx);
+                        _handleGroupExport(group);
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _handleGroupExport(GroupPreset group) async {
+    final logo = ref.read(logoNotifierProvider);
+    final notifier = ref.read(logoNotifierProvider.notifier);
+    if (logo.isExporting) return;
+    notifier.setIsExporting(true);
+
+    try {
+      final sizes = group.sizes
+          .map((s) => (name: '${group.label.toLowerCase()}_${s.label}', width: s.width, height: s.height))
+          .toList();
+
+      final count = await ExportUtils.exportGroup(
+        repaintKey: _repaintBoundaryKey,
+        format: logo.exportFormat,
+        sizes: sizes,
+        scale: logo.exportFormat == ExportFormat.svg ? 1 : logo.exportScale,
+        text: _controller.text,
+        backgroundColor: logo.backgroundColor,
+        textColor: logo.textColor,
+        fontFamily: logo.selectedFont,
+        canvasPadding: logo.canvasPadding,
+        textPadding: logo.textPadding,
+        svgString: logo.svgString,
+        borderRadius: logo.exportBorderRadius,
+        transparentBg: logo.transparentBackground,
+      );
+
+      if (mounted) {
+        if (count > 0) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Exported $count ${group.label} logos!'),
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Group export failed: $e'),
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) notifier.setIsExporting(false);
+    }
   }
 
   Future<void> _handleExport() async {

@@ -272,4 +272,88 @@ class ExportUtils {
 
     return true;
   }
+
+  /// Batch export multiple sizes to a selected folder.
+  /// Returns the number of successfully exported files.
+  static Future<int> exportGroup({
+    required GlobalKey repaintKey,
+    required ExportFormat format,
+    required List<({String name, int width, int height})> sizes,
+    required int scale,
+    // For SVG (text mode)
+    String? text,
+    Color? backgroundColor,
+    Color? textColor,
+    String? fontFamily,
+    double? canvasPadding,
+    double? textPadding,
+    // For SVG (svg upload mode)
+    String? svgString,
+    double? borderRadius,
+    bool? transparentBg,
+  }) async {
+    final dirPath = await FilePicker.platform.getDirectoryPath(
+      dialogTitle: 'Select folder to save logos',
+    );
+    if (dirPath == null) return 0;
+
+    final ext = format.name;
+    int count = 0;
+
+    for (final size in sizes) {
+      final scaleLabel =
+          (format != ExportFormat.svg && scale > 1) ? '@${scale}x' : '';
+      final fileName = '${size.name}$scaleLabel.$ext';
+      final file = File('$dirPath/$fileName');
+
+      switch (format) {
+        case ExportFormat.png:
+          final image = await _captureImage(
+            repaintKey,
+            targetWidth: size.width,
+            scale: scale,
+          );
+          final bytes = await _toPng(image);
+          await file.writeAsBytes(bytes);
+          count++;
+        case ExportFormat.jpg:
+          final image = await _captureImage(
+            repaintKey,
+            targetWidth: size.width,
+            scale: scale,
+          );
+          final bytes = await _toJpg(image);
+          await file.writeAsBytes(bytes);
+          count++;
+        case ExportFormat.svg:
+          final String svgContent;
+          if (svgString != null) {
+            svgContent = _wrapSvg(
+              innerSvg: svgString,
+              width: size.width,
+              height: size.height,
+              backgroundColor: backgroundColor!,
+              canvasPadding: canvasPadding ?? 0.0,
+              borderRadius: borderRadius ?? 0.0,
+              transparentBackground: transparentBg ?? false,
+            );
+          } else {
+            svgContent = _toSvg(
+              text: text!,
+              width: size.width,
+              height: size.height,
+              backgroundColor: backgroundColor!,
+              textColor: textColor!,
+              fontFamily: fontFamily!,
+              canvasPadding: canvasPadding!,
+              textPadding: textPadding!,
+            );
+          }
+          await file.writeAsString(svgContent);
+          count++;
+      }
+    }
+
+    return count;
+  }
 }
