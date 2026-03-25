@@ -78,12 +78,17 @@ class ExportUtils {
       )..layout();
       if (tp.width > maxLineWidth) maxLineWidth = tp.width;
     }
-    final refLineHeight = TextPainter(
+    final refMeasure = TextPainter(
       text: TextSpan(text: 'Ag', style: refStyle),
       textDirection: TextDirection.ltr,
     )..layout();
-    final singleLineHeight = refLineHeight.height;
+    final singleLineHeight = refMeasure.height;
     final totalRefHeight = singleLineHeight * lineCount;
+
+    // Compute ascent ratio from font metrics
+    final metrics = refMeasure.computeLineMetrics();
+    final ascent = metrics.isNotEmpty ? metrics.first.ascent : refSize * 0.8;
+    final ascentRatio = ascent / refSize;
 
     // Scale font size to fit available area
     final scaleByWidth = availableWidth / maxLineWidth;
@@ -93,7 +98,7 @@ class ExportUtils {
 
     final lineHeight = singleLineHeight * scale;
     final totalTextHeight = lineHeight * lineCount;
-    final startY = (height - totalTextHeight) / 2 + fontSize * 0.85;
+    final startY = (height - totalTextHeight) / 2 + fontSize * ascentRatio;
 
     // Google Fonts URL for embedding
     final fontParam = fontFamily.replaceAll(' ', '+');
