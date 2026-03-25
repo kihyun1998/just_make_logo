@@ -1,0 +1,21 @@
+{
+  "text": "QR",
+  "selectedFont": "Michroma",
+  "fontWeightValue": 400,
+  "backgroundColor": 4294967295,
+  "textColor": 4278190080,
+  "selectedSize": "1024 x 1024",
+  "canvasPadding": 0.0,
+  "textPadding": 0.0,
+  "maxLines": 1,
+  "exportFormat": "png",
+  "exportScale": 1,
+  "logoMode": "textOnly",
+  "imagePosition": "top",
+  "imageFlexRatio": 0.5,
+  "imageGap": 8.0,
+  "imageFitMode": "contain",
+  "transparentBackground": false,
+  "exportBorderRadius": 0.0,
+  "backgroundShape": "rectangle"
+}
