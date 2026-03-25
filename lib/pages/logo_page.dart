@@ -1536,6 +1536,8 @@ class _LogoPageState extends ConsumerState<LogoPage> {
         transparentBg: logo.transparentBackground,
         backgroundShape: logo.backgroundShape,
         fontWeightValue: logo.fontWeight.value,
+        textStyle: getFontStyle(logo.selectedFont, 120, logo.textColor,
+            fontWeight: logo.fontWeight),
       );
 
       if (mounted) {
@@ -1586,6 +1588,8 @@ class _LogoPageState extends ConsumerState<LogoPage> {
         transparentBg: logo.transparentBackground,
         backgroundShape: logo.backgroundShape,
         fontWeightValue: logo.fontWeight.value,
+        textStyle: getFontStyle(logo.selectedFont, 120, logo.textColor,
+            fontWeight: logo.fontWeight),
       );
 
       if (mounted) {

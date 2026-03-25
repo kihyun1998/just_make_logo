@@ -53,30 +53,45 @@ class ExportUtils {
     required double borderRadius,
     required bool transparentBackground,
     required int fontWeightValue,
+    required TextStyle textStyle,
   }) {
     final bgHex = _colorToHex(backgroundColor);
     final textHex = _colorToHex(textColor);
 
     final lines = text.split('\n');
     final lineCount = lines.length;
-    final maxChars = lines
-        .map((l) => l.length)
-        .reduce((a, b) => a > b ? a : b)
-        .clamp(1, 999);
 
     final canvasScale = (1.0 - canvasPadding).clamp(0.1, 1.0);
     final textScale = (1.0 - textPadding).clamp(0.1, 1.0);
     final availableWidth = width * canvasScale * textScale;
     final availableHeight = height * canvasScale * textScale;
 
-    // Average character width ratio varies by font; use 0.65 as a safe default.
-    // For short texts (1-2 chars), use a wider ratio since capital letters are wider.
-    final charWidthRatio = maxChars <= 2 ? 0.75 : 0.65;
-    final byWidth = availableWidth / (maxChars * charWidthRatio);
-    final byHeight = availableHeight / (lineCount * 1.2);
-    final fontSize = byWidth < byHeight ? byWidth : byHeight;
+    // Measure actual text dimensions using TextPainter with a reference font size
+    const refSize = 100.0;
+    final refStyle = textStyle.copyWith(fontSize: refSize);
 
-    final lineHeight = fontSize * 1.2;
+    double maxLineWidth = 0;
+    for (final line in lines) {
+      final tp = TextPainter(
+        text: TextSpan(text: line, style: refStyle),
+        textDirection: TextDirection.ltr,
+      )..layout();
+      if (tp.width > maxLineWidth) maxLineWidth = tp.width;
+    }
+    final refLineHeight = TextPainter(
+      text: TextSpan(text: 'Ag', style: refStyle),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    final singleLineHeight = refLineHeight.height;
+    final totalRefHeight = singleLineHeight * lineCount;
+
+    // Scale font size to fit available area
+    final scaleByWidth = availableWidth / maxLineWidth;
+    final scaleByHeight = availableHeight / totalRefHeight;
+    final scale = scaleByWidth < scaleByHeight ? scaleByWidth : scaleByHeight;
+    final fontSize = refSize * scale;
+
+    final lineHeight = singleLineHeight * scale;
     final totalTextHeight = lineHeight * lineCount;
     final startY = (height - totalTextHeight) / 2 + fontSize * 0.85;
 
@@ -265,6 +280,7 @@ class ExportUtils {
     bool? transparentBg,
     BackgroundShape? backgroundShape,
     int? fontWeightValue,
+    TextStyle? textStyle,
   }) async {
     final ext = format.name;
     final scaleLabel = (format != ExportFormat.svg && scale > 1)
@@ -332,6 +348,7 @@ class ExportUtils {
             borderRadius: borderRadius ?? 0.0,
             transparentBackground: transparentBg ?? false,
             fontWeightValue: fontWeightValue ?? 400,
+            textStyle: textStyle!,
           );
         }
         await file.writeAsString(svgContent);
@@ -360,6 +377,7 @@ class ExportUtils {
     bool? transparentBg,
     BackgroundShape? backgroundShape,
     int? fontWeightValue,
+    TextStyle? textStyle,
   }) async {
     final dirPath = await FilePicker.platform.getDirectoryPath(
       dialogTitle: 'Select folder to save logos',
@@ -421,6 +439,7 @@ class ExportUtils {
               borderRadius: borderRadius ?? 0.0,
               transparentBackground: transparentBg ?? false,
               fontWeightValue: fontWeightValue ?? 400,
+              textStyle: textStyle!,
             );
           }
           await file.writeAsString(svgContent);
