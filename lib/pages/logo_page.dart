@@ -217,6 +217,7 @@ class _LogoPageState extends ConsumerState<LogoPage> {
               transparentBackground: logo.transparentBackground,
               exportBorderRadius: logo.exportBorderRadius,
               backgroundShape: logo.backgroundShape,
+              backgroundGradient: logo.backgroundGradient,
             ),
           ),
         ],
@@ -696,13 +697,145 @@ class _LogoPageState extends ConsumerState<LogoPage> {
               ],
             ),
             const SizedBox(height: 8),
-            if (!logo.transparentBackground)
+            if (!logo.transparentBackground) ...[
               ColorPicker(
-                label: 'BG',
+                label: 'BG${logo.useGradient ? ' Start' : ''}',
                 selected: logo.backgroundColor,
                 colors: LogoConstants.colors,
                 onSelect: (c) => notifier.setBackgroundColor(c),
               ),
+              const SizedBox(height: 8),
+              // Gradient toggle
+              Row(
+                children: [
+                  SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: Checkbox(
+                      value: logo.useGradient,
+                      onChanged: (v) => notifier.setUseGradient(v ?? false),
+                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    'Gradient',
+                    style: TextStyle(
+                      color: colors.mutedForeground,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+              if (logo.useGradient) ...[
+                const SizedBox(height: 8),
+                ColorPicker(
+                  label: 'BG End',
+                  selected: logo.gradientEndColor,
+                  colors: LogoConstants.colors,
+                  onSelect: (c) => notifier.setGradientEndColor(c),
+                ),
+                const SizedBox(height: 8),
+                // Gradient type
+                Row(
+                  children: [
+                    _buildOptionChip(
+                      'Linear',
+                      isSelected: logo.gradientType == GradientType.linear,
+                      onTap: () =>
+                          notifier.setGradientType(GradientType.linear),
+                    ),
+                    _buildOptionChip(
+                      'Radial',
+                      isSelected: logo.gradientType == GradientType.radial,
+                      onTap: () =>
+                          notifier.setGradientType(GradientType.radial),
+                    ),
+                  ],
+                ),
+                if (logo.gradientType == GradientType.linear) ...[
+                  const SizedBox(height: 8),
+                  TextOnlyDropdownButton(
+                    items: const [
+                      '↓ Top → Bottom',
+                      '↑ Bottom → Top',
+                      '→ Left → Right',
+                      '← Right → Left',
+                      '↘ TopLeft → BottomRight',
+                      '↙ TopRight → BottomLeft',
+                      '↗ BottomLeft → TopRight',
+                      '↖ BottomRight → TopLeft',
+                    ],
+                    value: const {
+                      GradientDirection.topToBottom: '↓ Top → Bottom',
+                      GradientDirection.bottomToTop: '↑ Bottom → Top',
+                      GradientDirection.leftToRight: '→ Left → Right',
+                      GradientDirection.rightToLeft: '← Right → Left',
+                      GradientDirection.topLeftToBottomRight:
+                          '↘ TopLeft → BottomRight',
+                      GradientDirection.topRightToBottomLeft:
+                          '↙ TopRight → BottomLeft',
+                      GradientDirection.bottomLeftToTopRight:
+                          '↗ BottomLeft → TopRight',
+                      GradientDirection.bottomRightToTopLeft:
+                          '↖ BottomRight → TopLeft',
+                    }[logo.gradientDirection],
+                    hint: 'Direction',
+                    width: double.infinity,
+                    theme: _dropdownTheme(),
+                    config: _dropdownConfig(),
+                    onChanged: (value) {
+                      if (value == null) return;
+                      const map = {
+                        '↓ Top → Bottom': GradientDirection.topToBottom,
+                        '↑ Bottom → Top': GradientDirection.bottomToTop,
+                        '→ Left → Right': GradientDirection.leftToRight,
+                        '← Right → Left': GradientDirection.rightToLeft,
+                        '↘ TopLeft → BottomRight':
+                            GradientDirection.topLeftToBottomRight,
+                        '↙ TopRight → BottomLeft':
+                            GradientDirection.topRightToBottomLeft,
+                        '↗ BottomLeft → TopRight':
+                            GradientDirection.bottomLeftToTopRight,
+                        '↖ BottomRight → TopLeft':
+                            GradientDirection.bottomRightToTopLeft,
+                      };
+                      if (map[value] != null) {
+                        notifier.setGradientDirection(map[value]!);
+                      }
+                    },
+                  ),
+                ],
+                const SizedBox(height: 8),
+                // Gradient presets
+                Wrap(
+                  spacing: 4,
+                  runSpacing: 4,
+                  children: gradientPresets.map((preset) {
+                    return GestureDetector(
+                      onTap: () => notifier.applyGradientPreset(preset),
+                      child: Tooltip(
+                        message: preset.name,
+                        child: Container(
+                          width: 24,
+                          height: 24,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [preset.startColor, preset.endColor],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            borderRadius: BorderRadius.circular(4),
+                            border: Border.all(
+                                color: colors.border, width: 0.5),
+                          ),
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ],
+            ],
             if (!logo.transparentBackground) const SizedBox(height: 8),
             if (logo.showText) ...[
               const SizedBox(height: 8),
@@ -1538,6 +1671,10 @@ class _LogoPageState extends ConsumerState<LogoPage> {
         fontWeightValue: logo.fontWeight.value,
         textStyle: getFontStyle(logo.selectedFont, 120, logo.textColor,
             fontWeight: logo.fontWeight),
+        useGradient: logo.useGradient,
+        gradientEndColor: logo.gradientEndColor,
+        gradientType: logo.gradientType,
+        gradientDirection: logo.gradientDirection,
       );
 
       if (mounted) {
@@ -1590,6 +1727,10 @@ class _LogoPageState extends ConsumerState<LogoPage> {
         fontWeightValue: logo.fontWeight.value,
         textStyle: getFontStyle(logo.selectedFont, 120, logo.textColor,
             fontWeight: logo.fontWeight),
+        useGradient: logo.useGradient,
+        gradientEndColor: logo.gradientEndColor,
+        gradientType: logo.gradientType,
+        gradientDirection: logo.gradientDirection,
       );
 
       if (mounted) {

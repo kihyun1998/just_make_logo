@@ -54,6 +54,10 @@ class ExportUtils {
     required bool transparentBackground,
     required int fontWeightValue,
     required TextStyle textStyle,
+    bool useGradient = false,
+    Color? gradientEndColor,
+    GradientType gradientType = GradientType.linear,
+    GradientDirection gradientDirection = GradientDirection.topLeftToBottomRight,
   }) {
     final bgHex = _colorToHex(backgroundColor);
     final textHex = _colorToHex(textColor);
@@ -124,16 +128,40 @@ class ExportUtils {
     final cy = height / 2;
     final r = (width < height ? width : height) / 2;
 
+    // Gradient SVG defs
+    String gradientDef = '';
+    final fillAttr = useGradient && gradientEndColor != null
+        ? 'url(#bg-gradient)'
+        : bgHex;
+
+    if (useGradient && gradientEndColor != null && !transparentBackground) {
+      final endHex = _colorToHex(gradientEndColor);
+      if (gradientType == GradientType.radial) {
+        gradientDef = '    <radialGradient id="bg-gradient">\n'
+            '      <stop offset="0%" stop-color="$bgHex"/>\n'
+            '      <stop offset="100%" stop-color="$endHex"/>\n'
+            '    </radialGradient>\n';
+      } else {
+        final coords = _gradientDirectionToSvg(gradientDirection);
+        gradientDef = '    <linearGradient id="bg-gradient" '
+            'x1="${coords.$1}" y1="${coords.$2}" '
+            'x2="${coords.$3}" y2="${coords.$4}">\n'
+            '      <stop offset="0%" stop-color="$bgHex"/>\n'
+            '      <stop offset="100%" stop-color="$endHex"/>\n'
+            '    </linearGradient>\n';
+      }
+    }
+
     String bgElement = '';
     if (!transparentBackground) {
       if (isCircle) {
-        bgElement = '  <circle cx="$cx" cy="$cy" r="$r" fill="$bgHex"/>\n';
+        bgElement = '  <circle cx="$cx" cy="$cy" r="$r" fill="$fillAttr"/>\n';
       } else if (borderRadius > 0) {
         bgElement =
-            '  <rect width="$width" height="$height" rx="$borderRadius" ry="$borderRadius" fill="$bgHex"/>\n';
+            '  <rect width="$width" height="$height" rx="$borderRadius" ry="$borderRadius" fill="$fillAttr"/>\n';
       } else {
         bgElement =
-            '  <rect width="$width" height="$height" fill="$bgHex"/>\n';
+            '  <rect width="$width" height="$height" fill="$fillAttr"/>\n';
       }
     }
 
@@ -156,7 +184,8 @@ class ExportUtils {
         '    <style>\n'
         '      @import url(\'$fontUrl\');\n'
         '    </style>\n'
-        '$clipDefs'
+        '$gradientDef'
+'$clipDefs'
         '  </defs>\n'
         '$bgElement'
         '$clipOpen'
@@ -256,6 +285,28 @@ class ExportUtils {
     return buf.toString();
   }
 
+  static (String, String, String, String) _gradientDirectionToSvg(
+      GradientDirection dir) {
+    switch (dir) {
+      case GradientDirection.topToBottom:
+        return ('0%', '0%', '0%', '100%');
+      case GradientDirection.bottomToTop:
+        return ('0%', '100%', '0%', '0%');
+      case GradientDirection.leftToRight:
+        return ('0%', '0%', '100%', '0%');
+      case GradientDirection.rightToLeft:
+        return ('100%', '0%', '0%', '0%');
+      case GradientDirection.topLeftToBottomRight:
+        return ('0%', '0%', '100%', '100%');
+      case GradientDirection.topRightToBottomLeft:
+        return ('100%', '0%', '0%', '100%');
+      case GradientDirection.bottomLeftToTopRight:
+        return ('0%', '100%', '100%', '0%');
+      case GradientDirection.bottomRightToTopLeft:
+        return ('100%', '100%', '0%', '0%');
+    }
+  }
+
   static String _escapeXml(String text) {
     return text
         .replaceAll('&', '&amp;')
@@ -286,6 +337,10 @@ class ExportUtils {
     BackgroundShape? backgroundShape,
     int? fontWeightValue,
     TextStyle? textStyle,
+    bool useGradient = false,
+    Color? gradientEndColor,
+    GradientType gradientType = GradientType.linear,
+    GradientDirection gradientDirection = GradientDirection.topLeftToBottomRight,
   }) async {
     final ext = format.name;
     final scaleLabel = (format != ExportFormat.svg && scale > 1)
@@ -354,6 +409,10 @@ class ExportUtils {
             transparentBackground: transparentBg ?? false,
             fontWeightValue: fontWeightValue ?? 400,
             textStyle: textStyle!,
+            useGradient: useGradient,
+            gradientEndColor: gradientEndColor,
+            gradientType: gradientType,
+            gradientDirection: gradientDirection,
           );
         }
         await file.writeAsString(svgContent);
@@ -383,6 +442,10 @@ class ExportUtils {
     BackgroundShape? backgroundShape,
     int? fontWeightValue,
     TextStyle? textStyle,
+    bool useGradient = false,
+    Color? gradientEndColor,
+    GradientType gradientType = GradientType.linear,
+    GradientDirection gradientDirection = GradientDirection.topLeftToBottomRight,
   }) async {
     final dirPath = await FilePicker.platform.getDirectoryPath(
       dialogTitle: 'Select folder to save logos',
@@ -445,6 +508,10 @@ class ExportUtils {
               transparentBackground: transparentBg ?? false,
               fontWeightValue: fontWeightValue ?? 400,
               textStyle: textStyle!,
+              useGradient: useGradient,
+              gradientEndColor: gradientEndColor,
+              gradientType: gradientType,
+              gradientDirection: gradientDirection,
             );
           }
           await file.writeAsString(svgContent);

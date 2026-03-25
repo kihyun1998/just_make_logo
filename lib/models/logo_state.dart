@@ -13,6 +13,88 @@ enum ImageFitMode { contain, cover, fill }
 
 enum BackgroundShape { rectangle, circle }
 
+enum GradientType { linear, radial }
+
+enum GradientDirection {
+  topToBottom,
+  bottomToTop,
+  leftToRight,
+  rightToLeft,
+  topLeftToBottomRight,
+  topRightToBottomLeft,
+  bottomLeftToTopRight,
+  bottomRightToTopLeft,
+}
+
+class GradientPreset {
+  final String name;
+  final Color startColor;
+  final Color endColor;
+  final GradientType type;
+  final GradientDirection direction;
+
+  const GradientPreset({
+    required this.name,
+    required this.startColor,
+    required this.endColor,
+    this.type = GradientType.linear,
+    this.direction = GradientDirection.topLeftToBottomRight,
+  });
+}
+
+const gradientPresets = [
+  GradientPreset(
+    name: 'Sunset',
+    startColor: Color(0xFFFF6B6B),
+    endColor: Color(0xFFFFE66D),
+  ),
+  GradientPreset(
+    name: 'Ocean',
+    startColor: Color(0xFF667EEA),
+    endColor: Color(0xFF764BA2),
+  ),
+  GradientPreset(
+    name: 'Mint',
+    startColor: Color(0xFF11998E),
+    endColor: Color(0xFF38EF7D),
+  ),
+  GradientPreset(
+    name: 'Peach',
+    startColor: Color(0xFFED6EA0),
+    endColor: Color(0xFFEC8C69),
+  ),
+  GradientPreset(
+    name: 'Night',
+    startColor: Color(0xFF0F2027),
+    endColor: Color(0xFF2C5364),
+  ),
+  GradientPreset(
+    name: 'Berry',
+    startColor: Color(0xFF8E2DE2),
+    endColor: Color(0xFF4A00E0),
+  ),
+  GradientPreset(
+    name: 'Fire',
+    startColor: Color(0xFFFF416C),
+    endColor: Color(0xFFFF4B2B),
+  ),
+  GradientPreset(
+    name: 'Sky',
+    startColor: Color(0xFF56CCF2),
+    endColor: Color(0xFF2F80ED),
+  ),
+  GradientPreset(
+    name: 'Lime',
+    startColor: Color(0xFFA8E063),
+    endColor: Color(0xFF56AB2F),
+  ),
+  GradientPreset(
+    name: 'Royal',
+    startColor: Color(0xFF141E30),
+    endColor: Color(0xFF243B55),
+  ),
+];
+
 class LogoState {
   final String selectedFont;
   final int fontWeightValue;
@@ -36,6 +118,10 @@ class LogoState {
   final bool transparentBackground;
   final double exportBorderRadius;
   final BackgroundShape backgroundShape;
+  final bool useGradient;
+  final Color gradientEndColor;
+  final GradientType gradientType;
+  final GradientDirection gradientDirection;
 
   const LogoState({
     this.logoMode = LogoMode.textOnly,
@@ -60,6 +146,10 @@ class LogoState {
     this.transparentBackground = false,
     this.exportBorderRadius = 0.0,
     this.backgroundShape = BackgroundShape.rectangle,
+    this.useGradient = false,
+    this.gradientEndColor = const Color(0xFF000000),
+    this.gradientType = GradientType.linear,
+    this.gradientDirection = GradientDirection.topLeftToBottomRight,
   });
 
   static const Map<int, String> weightLabels = {
@@ -112,6 +202,10 @@ class LogoState {
       'transparentBackground': transparentBackground,
       'exportBorderRadius': exportBorderRadius,
       'backgroundShape': backgroundShape.name,
+      'useGradient': useGradient,
+      'gradientEndColor': gradientEndColor.toARGB32(),
+      'gradientType': gradientType.name,
+      'gradientDirection': gradientDirection.name,
     };
   }
 
@@ -157,7 +251,43 @@ class LogoState {
           (e) => e.name == json['backgroundShape'],
           orElse: () => BackgroundShape.rectangle,
         ),
+        useGradient: json['useGradient'] as bool? ?? false,
+        gradientEndColor:
+            Color(json['gradientEndColor'] as int? ?? 0xFF000000),
+        gradientType: GradientType.values.firstWhere(
+          (e) => e.name == json['gradientType'],
+          orElse: () => GradientType.linear,
+        ),
+        gradientDirection: GradientDirection.values.firstWhere(
+          (e) => e.name == json['gradientDirection'],
+          orElse: () => GradientDirection.topLeftToBottomRight,
+        ),
       ),
+    );
+  }
+
+  static const Map<GradientDirection, (Alignment, Alignment)> _gradientAligns = {
+    GradientDirection.topToBottom: (Alignment.topCenter, Alignment.bottomCenter),
+    GradientDirection.bottomToTop: (Alignment.bottomCenter, Alignment.topCenter),
+    GradientDirection.leftToRight: (Alignment.centerLeft, Alignment.centerRight),
+    GradientDirection.rightToLeft: (Alignment.centerRight, Alignment.centerLeft),
+    GradientDirection.topLeftToBottomRight: (Alignment.topLeft, Alignment.bottomRight),
+    GradientDirection.topRightToBottomLeft: (Alignment.topRight, Alignment.bottomLeft),
+    GradientDirection.bottomLeftToTopRight: (Alignment.bottomLeft, Alignment.topRight),
+    GradientDirection.bottomRightToTopLeft: (Alignment.bottomRight, Alignment.topLeft),
+  };
+
+  Gradient? get backgroundGradient {
+    if (!useGradient) return null;
+    final colors = [backgroundColor, gradientEndColor];
+    if (gradientType == GradientType.radial) {
+      return RadialGradient(colors: colors);
+    }
+    final aligns = _gradientAligns[gradientDirection]!;
+    return LinearGradient(
+      begin: aligns.$1,
+      end: aligns.$2,
+      colors: colors,
     );
   }
 
@@ -192,6 +322,10 @@ class LogoState {
     bool? transparentBackground,
     double? exportBorderRadius,
     BackgroundShape? backgroundShape,
+    bool? useGradient,
+    Color? gradientEndColor,
+    GradientType? gradientType,
+    GradientDirection? gradientDirection,
   }) {
     return LogoState(
       logoMode: logoMode ?? this.logoMode,
@@ -219,6 +353,10 @@ class LogoState {
           transparentBackground ?? this.transparentBackground,
       exportBorderRadius: exportBorderRadius ?? this.exportBorderRadius,
       backgroundShape: backgroundShape ?? this.backgroundShape,
+      useGradient: useGradient ?? this.useGradient,
+      gradientEndColor: gradientEndColor ?? this.gradientEndColor,
+      gradientType: gradientType ?? this.gradientType,
+      gradientDirection: gradientDirection ?? this.gradientDirection,
     );
   }
 }

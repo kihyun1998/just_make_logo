@@ -174,6 +174,32 @@ class LogoNotifier extends _$LogoNotifier {
     state = state.copyWith(backgroundShape: shape);
   }
 
+  void setUseGradient(bool value) {
+    state = state.copyWith(useGradient: value);
+  }
+
+  void setGradientEndColor(Color color) {
+    state = state.copyWith(gradientEndColor: color);
+  }
+
+  void setGradientType(GradientType type) {
+    state = state.copyWith(gradientType: type);
+  }
+
+  void setGradientDirection(GradientDirection direction) {
+    state = state.copyWith(gradientDirection: direction);
+  }
+
+  void applyGradientPreset(GradientPreset preset) {
+    state = state.copyWith(
+      useGradient: true,
+      backgroundColor: preset.startColor,
+      gradientEndColor: preset.endColor,
+      gradientType: preset.type,
+      gradientDirection: preset.direction,
+    );
+  }
+
   void setSvgString(String? svg) {
     state = state.copyWith(svgString: svg);
   }

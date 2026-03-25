@@ -24,6 +24,7 @@ class LogoPreview extends StatelessWidget {
   final bool transparentBackground;
   final double exportBorderRadius;
   final BackgroundShape backgroundShape;
+  final Gradient? backgroundGradient;
 
   const LogoPreview({
     super.key,
@@ -44,6 +45,7 @@ class LogoPreview extends StatelessWidget {
     this.transparentBackground = false,
     this.exportBorderRadius = 0.0,
     this.backgroundShape = BackgroundShape.rectangle,
+    this.backgroundGradient,
   });
 
   BoxFit _toBoxFit(ImageFitMode mode) {
@@ -170,7 +172,10 @@ class LogoPreview extends StatelessWidget {
     final hasBorderRadius = exportBorderRadius > 0;
 
     Widget innerContent = Container(
-      color: bgColor,
+      decoration: BoxDecoration(
+        color: backgroundGradient == null ? bgColor : null,
+        gradient: transparentBackground ? null : backgroundGradient,
+      ),
       child: canvasPadding > 0
           ? Center(
               child: FractionallySizedBox(
