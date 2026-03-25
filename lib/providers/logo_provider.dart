@@ -1,5 +1,8 @@
+import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -181,5 +184,43 @@ class LogoNotifier extends _$LogoNotifier {
 
   void clearImage() {
     state = state.copyWith(imageBytes: null);
+  }
+
+  Future<bool> savePreset(String text) async {
+    final result = await FilePicker.platform.saveFile(
+      dialogTitle: 'Save Preset',
+      fileName: 'logo_preset.json',
+      allowedExtensions: ['json'],
+      type: FileType.custom,
+    );
+    if (result == null) return false;
+
+    final json = state.toPresetJson(text);
+    final file = File(result);
+    await file.writeAsString(
+      const JsonEncoder.withIndent('  ').convert(json),
+    );
+    return true;
+  }
+
+  Future<String?> loadPreset() async {
+    final result = await FilePicker.platform.pickFiles(
+      dialogTitle: 'Load Preset',
+      allowedExtensions: ['json'],
+      type: FileType.custom,
+    );
+    if (result == null || result.files.single.path == null) return null;
+
+    final file = File(result.files.single.path!);
+    final content = await file.readAsString();
+    final json = jsonDecode(content) as Map<String, dynamic>;
+    final preset = LogoState.fromPresetJson(json);
+
+    state = preset.state.copyWith(
+      colorPresets: state.colorPresets,
+      imageBytes: state.imageBytes,
+      svgString: state.svgString,
+    );
+    return preset.text;
   }
 }

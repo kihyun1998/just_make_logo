@@ -91,6 +91,76 @@ class LogoState {
 
   FontWeight get fontWeight => valueToFontWeight(fontWeightValue);
 
+  Map<String, dynamic> toPresetJson(String text) {
+    return {
+      'text': text,
+      'selectedFont': selectedFont,
+      'fontWeightValue': fontWeightValue,
+      'backgroundColor': backgroundColor.toARGB32(),
+      'textColor': textColor.toARGB32(),
+      'selectedSize': selectedSize,
+      'canvasPadding': canvasPadding,
+      'textPadding': textPadding,
+      'maxLines': maxLines,
+      'exportFormat': exportFormat.name,
+      'exportScale': exportScale,
+      'logoMode': logoMode.name,
+      'imagePosition': imagePosition.name,
+      'imageFlexRatio': imageFlexRatio,
+      'imageGap': imageGap,
+      'imageFitMode': imageFitMode.name,
+      'transparentBackground': transparentBackground,
+      'exportBorderRadius': exportBorderRadius,
+      'backgroundShape': backgroundShape.name,
+    };
+  }
+
+  static ({LogoState state, String text}) fromPresetJson(
+      Map<String, dynamic> json) {
+    return (
+      text: json['text'] as String? ?? 'HELLO',
+      state: LogoState(
+        selectedFont: json['selectedFont'] as String? ?? 'Workbench',
+        fontWeightValue: json['fontWeightValue'] as int? ?? 400,
+        backgroundColor:
+            Color(json['backgroundColor'] as int? ?? 0xFFFFFFFF),
+        textColor: Color(json['textColor'] as int? ?? 0xFF000000),
+        selectedSize: json['selectedSize'] as String? ?? '512 x 512',
+        canvasPadding: (json['canvasPadding'] as num?)?.toDouble() ?? 0.0,
+        textPadding: (json['textPadding'] as num?)?.toDouble() ?? 0.0,
+        maxLines: json['maxLines'] as int? ?? 1,
+        exportFormat: ExportFormat.values.firstWhere(
+          (e) => e.name == json['exportFormat'],
+          orElse: () => ExportFormat.png,
+        ),
+        exportScale: json['exportScale'] as int? ?? 1,
+        logoMode: LogoMode.values.firstWhere(
+          (e) => e.name == json['logoMode'],
+          orElse: () => LogoMode.textOnly,
+        ),
+        imagePosition: ImagePosition.values.firstWhere(
+          (e) => e.name == json['imagePosition'],
+          orElse: () => ImagePosition.top,
+        ),
+        imageFlexRatio:
+            (json['imageFlexRatio'] as num?)?.toDouble() ?? 0.5,
+        imageGap: (json['imageGap'] as num?)?.toDouble() ?? 8,
+        imageFitMode: ImageFitMode.values.firstWhere(
+          (e) => e.name == json['imageFitMode'],
+          orElse: () => ImageFitMode.contain,
+        ),
+        transparentBackground:
+            json['transparentBackground'] as bool? ?? false,
+        exportBorderRadius:
+            (json['exportBorderRadius'] as num?)?.toDouble() ?? 0.0,
+        backgroundShape: BackgroundShape.values.firstWhere(
+          (e) => e.name == json['backgroundShape'],
+          orElse: () => BackgroundShape.rectangle,
+        ),
+      ),
+    );
+  }
+
   bool get hasImage => imageBytes != null;
   bool get hasSvg => svgString != null;
   bool get showText =>

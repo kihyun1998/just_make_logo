@@ -69,7 +69,10 @@ class ExportUtils {
     final availableWidth = width * canvasScale * textScale;
     final availableHeight = height * canvasScale * textScale;
 
-    final byWidth = availableWidth / (maxChars * 0.6);
+    // Average character width ratio varies by font; use 0.65 as a safe default.
+    // For short texts (1-2 chars), use a wider ratio since capital letters are wider.
+    final charWidthRatio = maxChars <= 2 ? 0.75 : 0.65;
+    final byWidth = availableWidth / (maxChars * charWidthRatio);
     final byHeight = availableHeight / (lineCount * 1.2);
     final fontSize = byWidth < byHeight ? byWidth : byHeight;
 

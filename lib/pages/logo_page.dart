@@ -879,6 +879,48 @@ class _LogoPageState extends ConsumerState<LogoPage> {
                 ),
               ),
             ),
+
+            _buildDivider(),
+
+            // Preset save/load
+            _buildSectionLabel('PRESET', Icons.save_outlined),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () => _handleSavePreset(),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: colors.foreground,
+                      side: BorderSide(color: colors.border),
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(radius.md),
+                      ),
+                    ),
+                    icon: const Icon(Icons.save_alt, size: 16),
+                    label: const Text('Save',
+                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () => _handleLoadPreset(),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: colors.foreground,
+                      side: BorderSide(color: colors.border),
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(radius.md),
+                      ),
+                    ),
+                    icon: const Icon(Icons.file_open_outlined, size: 16),
+                    label: const Text('Load',
+                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
       ),
@@ -1567,6 +1609,55 @@ class _LogoPageState extends ConsumerState<LogoPage> {
       }
     } finally {
       if (mounted) notifier.setIsExporting(false);
+    }
+  }
+
+  Future<void> _handleSavePreset() async {
+    final notifier = ref.read(logoNotifierProvider.notifier);
+    try {
+      final success = await notifier.savePreset(_controller.text);
+      if (mounted && success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Preset saved!'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Save failed: $e'),
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _handleLoadPreset() async {
+    final notifier = ref.read(logoNotifierProvider.notifier);
+    try {
+      final text = await notifier.loadPreset();
+      if (text != null && mounted) {
+        _controller.text = text;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Preset loaded!'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Load failed: $e'),
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
     }
   }
 
