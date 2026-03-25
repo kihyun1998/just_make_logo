@@ -52,6 +52,7 @@ class ExportUtils {
     required BackgroundShape backgroundShape,
     required double borderRadius,
     required bool transparentBackground,
+    required int fontWeightValue,
   }) {
     final bgHex = _colorToHex(backgroundColor);
     final textHex = _colorToHex(textColor);
@@ -78,7 +79,8 @@ class ExportUtils {
 
     // Google Fonts URL for embedding
     final fontParam = fontFamily.replaceAll(' ', '+');
-    final fontUrl = 'https://fonts.googleapis.com/css2?family=$fontParam';
+    final fontUrl =
+        'https://fonts.googleapis.com/css2?family=$fontParam:wght@$fontWeightValue';
 
     final textElements = lines
         .asMap()
@@ -89,6 +91,7 @@ class ExportUtils {
               'text-anchor="middle" '
               'font-family="\'$fontFamily\', sans-serif" '
               'font-size="${fontSize.toStringAsFixed(1)}" '
+              'font-weight="$fontWeightValue" '
               'fill="$textHex">${_escapeXml(entry.value)}</text>';
         })
         .join('\n');
@@ -258,6 +261,7 @@ class ExportUtils {
     double? borderRadius,
     bool? transparentBg,
     BackgroundShape? backgroundShape,
+    int? fontWeightValue,
   }) async {
     final ext = format.name;
     final scaleLabel = (format != ExportFormat.svg && scale > 1)
@@ -324,6 +328,7 @@ class ExportUtils {
             backgroundShape: backgroundShape ?? BackgroundShape.rectangle,
             borderRadius: borderRadius ?? 0.0,
             transparentBackground: transparentBg ?? false,
+            fontWeightValue: fontWeightValue ?? 400,
           );
         }
         await file.writeAsString(svgContent);
@@ -351,6 +356,7 @@ class ExportUtils {
     double? borderRadius,
     bool? transparentBg,
     BackgroundShape? backgroundShape,
+    int? fontWeightValue,
   }) async {
     final dirPath = await FilePicker.platform.getDirectoryPath(
       dialogTitle: 'Select folder to save logos',
@@ -411,6 +417,7 @@ class ExportUtils {
               backgroundShape: backgroundShape ?? BackgroundShape.rectangle,
               borderRadius: borderRadius ?? 0.0,
               transparentBackground: transparentBg ?? false,
+              fontWeightValue: fontWeightValue ?? 400,
             );
           }
           await file.writeAsString(svgContent);

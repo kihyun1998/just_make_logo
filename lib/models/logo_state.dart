@@ -15,6 +15,7 @@ enum BackgroundShape { rectangle, circle }
 
 class LogoState {
   final String selectedFont;
+  final int fontWeightValue;
   final Color backgroundColor;
   final Color textColor;
   final String selectedSize;
@@ -39,6 +40,7 @@ class LogoState {
   const LogoState({
     this.logoMode = LogoMode.textOnly,
     this.selectedFont = 'Workbench',
+    this.fontWeightValue = 400,
     this.backgroundColor = Colors.white,
     this.textColor = Colors.black,
     this.selectedSize = '512 x 512',
@@ -60,6 +62,35 @@ class LogoState {
     this.backgroundShape = BackgroundShape.rectangle,
   });
 
+  static const Map<int, String> weightLabels = {
+    100: 'Thin (100)',
+    200: 'ExtraLight (200)',
+    300: 'Light (300)',
+    400: 'Regular (400)',
+    500: 'Medium (500)',
+    600: 'SemiBold (600)',
+    700: 'Bold (700)',
+    800: 'ExtraBold (800)',
+    900: 'Black (900)',
+  };
+
+  static FontWeight valueToFontWeight(int value) {
+    switch (value) {
+      case 100: return FontWeight.w100;
+      case 200: return FontWeight.w200;
+      case 300: return FontWeight.w300;
+      case 500: return FontWeight.w500;
+      case 600: return FontWeight.w600;
+      case 700: return FontWeight.w700;
+      case 800: return FontWeight.w800;
+      case 900: return FontWeight.w900;
+      case 400:
+      default: return FontWeight.w400;
+    }
+  }
+
+  FontWeight get fontWeight => valueToFontWeight(fontWeightValue);
+
   bool get hasImage => imageBytes != null;
   bool get hasSvg => svgString != null;
   bool get showText =>
@@ -71,6 +102,7 @@ class LogoState {
   LogoState copyWith({
     LogoMode? logoMode,
     String? selectedFont,
+    int? fontWeightValue,
     Color? backgroundColor,
     Color? textColor,
     String? selectedSize,
@@ -94,6 +126,7 @@ class LogoState {
     return LogoState(
       logoMode: logoMode ?? this.logoMode,
       selectedFont: selectedFont ?? this.selectedFont,
+      fontWeightValue: fontWeightValue ?? this.fontWeightValue,
       backgroundColor: backgroundColor ?? this.backgroundColor,
       textColor: textColor ?? this.textColor,
       selectedSize: selectedSize ?? this.selectedSize,

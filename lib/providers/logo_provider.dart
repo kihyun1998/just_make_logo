@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../constants/logo_constants.dart';
 import '../models/color_preset.dart';
 import '../models/logo_state.dart';
 import '../utils/export_utils.dart';
@@ -82,7 +83,15 @@ class LogoNotifier extends _$LogoNotifier {
   }
 
   void setFont(String font) {
-    state = state.copyWith(selectedFont: font);
+    final available = LogoConstants.fontWeights[font] ?? [400];
+    final currentWeight = state.fontWeightValue;
+    final newWeight =
+        available.contains(currentWeight) ? currentWeight : available.first;
+    state = state.copyWith(selectedFont: font, fontWeightValue: newWeight);
+  }
+
+  void setFontWeight(int value) {
+    state = state.copyWith(fontWeightValue: value);
   }
 
   void setBackgroundColor(Color color) {

@@ -201,7 +201,8 @@ class _LogoPageState extends ConsumerState<LogoPage> {
             child: LogoPreview(
               logoMode: logo.logoMode,
               text: _controller.text,
-              textStyle: getFontStyle(logo.selectedFont, 120, logo.textColor),
+              textStyle: getFontStyle(logo.selectedFont, 120, logo.textColor,
+                  fontWeight: logo.fontWeight),
               backgroundColor: logo.backgroundColor,
               canvasPadding: logo.canvasPadding,
               textPadding: logo.textPadding,
@@ -390,6 +391,35 @@ class _LogoPageState extends ConsumerState<LogoPage> {
                   ),
                 ],
               ),
+              const SizedBox(height: 8),
+              Builder(builder: (context) {
+                final available =
+                    LogoConstants.fontWeights[logo.selectedFont] ?? [400];
+                final labels = available
+                    .map((w) => LogoState.weightLabels[w] ?? '$w')
+                    .toList();
+                final currentLabel =
+                    LogoState.weightLabels[logo.fontWeightValue] ??
+                        '${logo.fontWeightValue}';
+                final selectedLabel =
+                    labels.contains(currentLabel) ? currentLabel : labels.first;
+                return TextOnlyDropdownButton(
+                  items: labels,
+                  value: selectedLabel,
+                  hint: 'Weight',
+                  width: double.infinity,
+                  theme: _dropdownTheme(),
+                  config: _dropdownConfig(),
+                  onChanged: (value) {
+                    if (value != null) {
+                      final idx = labels.indexOf(value);
+                      if (idx >= 0) {
+                        notifier.setFontWeight(available[idx]);
+                      }
+                    }
+                  },
+                );
+              }),
 
               _buildDivider(),
             ],
@@ -1463,6 +1493,7 @@ class _LogoPageState extends ConsumerState<LogoPage> {
         borderRadius: logo.exportBorderRadius,
         transparentBg: logo.transparentBackground,
         backgroundShape: logo.backgroundShape,
+        fontWeightValue: logo.fontWeight.value,
       );
 
       if (mounted) {
@@ -1512,6 +1543,7 @@ class _LogoPageState extends ConsumerState<LogoPage> {
         borderRadius: logo.exportBorderRadius,
         transparentBg: logo.transparentBackground,
         backgroundShape: logo.backgroundShape,
+        fontWeightValue: logo.fontWeight.value,
       );
 
       if (mounted) {
