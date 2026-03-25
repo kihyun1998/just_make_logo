@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:image/image.dart' as img;
 
+import '../models/logo_state.dart';
+
 enum ExportFormat { png, jpg, svg }
 
 class ExportUtils {
@@ -47,6 +49,9 @@ class ExportUtils {
     required String fontFamily,
     required double canvasPadding,
     required double textPadding,
+    required BackgroundShape backgroundShape,
+    required double borderRadius,
+    required bool transparentBackground,
   }) {
     final bgHex = _colorToHex(backgroundColor);
     final textHex = _colorToHex(textColor);
@@ -88,15 +93,49 @@ class ExportUtils {
         })
         .join('\n');
 
+    final isCircle = backgroundShape == BackgroundShape.circle;
+    final cx = width / 2;
+    final cy = height / 2;
+    final r = (width < height ? width : height) / 2;
+
+    String bgElement = '';
+    if (!transparentBackground) {
+      if (isCircle) {
+        bgElement = '  <circle cx="$cx" cy="$cy" r="$r" fill="$bgHex"/>\n';
+      } else if (borderRadius > 0) {
+        bgElement =
+            '  <rect width="$width" height="$height" rx="$borderRadius" ry="$borderRadius" fill="$bgHex"/>\n';
+      } else {
+        bgElement =
+            '  <rect width="$width" height="$height" fill="$bgHex"/>\n';
+      }
+    }
+
+    final needsClip = isCircle || borderRadius > 0;
+    String clipOpen = '';
+    String clipClose = '';
+    String clipDefs = '';
+    if (needsClip) {
+      final clipShape = isCircle
+          ? '      <circle cx="$cx" cy="$cy" r="$r"/>'
+          : '      <rect width="$width" height="$height" rx="$borderRadius" ry="$borderRadius"/>';
+      clipDefs = '    <clipPath id="clip">\n$clipShape\n    </clipPath>\n';
+      clipOpen = '  <g clip-path="url(#clip)">\n';
+      clipClose = '  </g>\n';
+    }
+
     return '<?xml version="1.0" encoding="UTF-8"?>\n'
         '<svg xmlns="http://www.w3.org/2000/svg" width="$width" height="$height" viewBox="0 0 $width $height">\n'
         '  <defs>\n'
         '    <style>\n'
         '      @import url(\'$fontUrl\');\n'
         '    </style>\n'
+        '$clipDefs'
         '  </defs>\n'
-        '  <rect width="$width" height="$height" fill="$bgHex"/>\n'
+        '$bgElement'
+        '$clipOpen'
         '$textElements\n'
+        '$clipClose'
         '</svg>';
   }
 
@@ -118,6 +157,7 @@ class ExportUtils {
     required double canvasPadding,
     required double borderRadius,
     required bool transparentBackground,
+    required BackgroundShape backgroundShape,
   }) {
     final scale = (1.0 - canvasPadding).clamp(0.1, 1.0);
     final innerW = (width * scale).round();
@@ -134,10 +174,19 @@ class ExportUtils {
       'viewBox="0 0 $width $height">',
     );
 
+    final isCircle = backgroundShape == BackgroundShape.circle;
+    final cx = width / 2;
+    final cy = height / 2;
+    final r = (width < height ? width : height) / 2;
+
     // Background
     if (!transparentBackground) {
       final bgHex = _colorToHex(backgroundColor);
-      if (borderRadius > 0) {
+      if (isCircle) {
+        buf.writeln(
+          '  <circle cx="$cx" cy="$cy" r="$r" fill="$bgHex"/>',
+        );
+      } else if (borderRadius > 0) {
         buf.writeln(
           '  <rect width="$width" height="$height" '
           'rx="$borderRadius" ry="$borderRadius" fill="$bgHex"/>',
@@ -147,14 +196,19 @@ class ExportUtils {
       }
     }
 
-    // Clip with border radius if needed
-    if (borderRadius > 0) {
+    // Clip with shape
+    final needsClip = isCircle || borderRadius > 0;
+    if (needsClip) {
       buf.writeln('  <defs>');
       buf.writeln('    <clipPath id="clip">');
-      buf.writeln(
-        '      <rect width="$width" height="$height" '
-        'rx="$borderRadius" ry="$borderRadius"/>',
-      );
+      if (isCircle) {
+        buf.writeln('      <circle cx="$cx" cy="$cy" r="$r"/>');
+      } else {
+        buf.writeln(
+          '      <rect width="$width" height="$height" '
+          'rx="$borderRadius" ry="$borderRadius"/>',
+        );
+      }
       buf.writeln('    </clipPath>');
       buf.writeln('  </defs>');
       buf.writeln('  <g clip-path="url(#clip)">');
@@ -168,7 +222,7 @@ class ExportUtils {
     inner = inner.replaceAll(RegExp(r'\s*height="[^"]*"'), ' height="$innerH"');
     buf.writeln(inner);
 
-    if (borderRadius > 0) {
+    if (needsClip) {
       buf.writeln('  </g>');
     }
 
@@ -203,6 +257,7 @@ class ExportUtils {
     String? svgString,
     double? borderRadius,
     bool? transparentBg,
+    BackgroundShape? backgroundShape,
   }) async {
     final ext = format.name;
     final scaleLabel = (format != ExportFormat.svg && scale > 1)
@@ -254,6 +309,7 @@ class ExportUtils {
             canvasPadding: canvasPadding ?? 0.0,
             borderRadius: borderRadius ?? 0.0,
             transparentBackground: transparentBg ?? false,
+            backgroundShape: backgroundShape ?? BackgroundShape.rectangle,
           );
         } else {
           svgContent = _toSvg(
@@ -265,6 +321,9 @@ class ExportUtils {
             fontFamily: fontFamily!,
             canvasPadding: canvasPadding!,
             textPadding: textPadding!,
+            backgroundShape: backgroundShape ?? BackgroundShape.rectangle,
+            borderRadius: borderRadius ?? 0.0,
+            transparentBackground: transparentBg ?? false,
           );
         }
         await file.writeAsString(svgContent);
@@ -291,6 +350,7 @@ class ExportUtils {
     String? svgString,
     double? borderRadius,
     bool? transparentBg,
+    BackgroundShape? backgroundShape,
   }) async {
     final dirPath = await FilePicker.platform.getDirectoryPath(
       dialogTitle: 'Select folder to save logos',
@@ -336,6 +396,7 @@ class ExportUtils {
               canvasPadding: canvasPadding ?? 0.0,
               borderRadius: borderRadius ?? 0.0,
               transparentBackground: transparentBg ?? false,
+              backgroundShape: backgroundShape ?? BackgroundShape.rectangle,
             );
           } else {
             svgContent = _toSvg(
@@ -347,6 +408,9 @@ class ExportUtils {
               fontFamily: fontFamily!,
               canvasPadding: canvasPadding!,
               textPadding: textPadding!,
+              backgroundShape: backgroundShape ?? BackgroundShape.rectangle,
+              borderRadius: borderRadius ?? 0.0,
+              transparentBackground: transparentBg ?? false,
             );
           }
           await file.writeAsString(svgContent);

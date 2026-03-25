@@ -11,6 +11,8 @@ enum ImagePosition { top, bottom, left, right }
 
 enum ImageFitMode { contain, cover, fill }
 
+enum BackgroundShape { rectangle, circle }
+
 class LogoState {
   final String selectedFont;
   final Color backgroundColor;
@@ -32,6 +34,7 @@ class LogoState {
   final String? svgString;
   final bool transparentBackground;
   final double exportBorderRadius;
+  final BackgroundShape backgroundShape;
 
   const LogoState({
     this.logoMode = LogoMode.textOnly,
@@ -54,6 +57,7 @@ class LogoState {
     this.svgString,
     this.transparentBackground = false,
     this.exportBorderRadius = 0.0,
+    this.backgroundShape = BackgroundShape.rectangle,
   });
 
   bool get hasImage => imageBytes != null;
@@ -85,6 +89,7 @@ class LogoState {
     ImageFitMode? imageFitMode,
     bool? transparentBackground,
     double? exportBorderRadius,
+    BackgroundShape? backgroundShape,
   }) {
     return LogoState(
       logoMode: logoMode ?? this.logoMode,
@@ -110,6 +115,7 @@ class LogoState {
       transparentBackground:
           transparentBackground ?? this.transparentBackground,
       exportBorderRadius: exportBorderRadius ?? this.exportBorderRadius,
+      backgroundShape: backgroundShape ?? this.backgroundShape,
     );
   }
 }

@@ -215,6 +215,7 @@ class _LogoPageState extends ConsumerState<LogoPage> {
               imageFitMode: logo.imageFitMode,
               transparentBackground: logo.transparentBackground,
               exportBorderRadius: logo.exportBorderRadius,
+              backgroundShape: logo.backgroundShape,
             ),
           ),
         ],
@@ -460,6 +461,81 @@ class _LogoPageState extends ConsumerState<LogoPage> {
                 SizedBox(
                   width: 48,
                   child: Text(
+                    'Shape',
+                    style: TextStyle(
+                      color: colors.mutedForeground,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 4),
+                ...BackgroundShape.values.map(
+                  (shape) {
+                    final selected = logo.backgroundShape == shape;
+                    final icon = switch (shape) {
+                      BackgroundShape.rectangle => Icons.rectangle_outlined,
+                      BackgroundShape.circle => Icons.circle_outlined,
+                    };
+                    final label = switch (shape) {
+                      BackgroundShape.rectangle => 'Rect',
+                      BackgroundShape.circle => 'Circle',
+                    };
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 4),
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(radius.sm),
+                        onTap: () => notifier.setBackgroundShape(shape),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: selected
+                                ? colors.primary.withValues(alpha: 0.1)
+                                : Colors.transparent,
+                            border: Border.all(
+                              color: selected
+                                  ? colors.primary
+                                  : colors.border,
+                            ),
+                            borderRadius: BorderRadius.circular(radius.sm),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                icon,
+                                size: 14,
+                                color: selected
+                                    ? colors.primary
+                                    : colors.mutedForeground,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                label,
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: selected
+                                      ? colors.primary
+                                      : colors.mutedForeground,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Row(
+              children: [
+                SizedBox(
+                  width: 48,
+                  child: Text(
                     'Canvas',
                     style: TextStyle(
                       color: colors.mutedForeground,
@@ -522,33 +598,34 @@ class _LogoPageState extends ConsumerState<LogoPage> {
                   ),
                 ],
               ),
-            Row(
-              children: [
-                SizedBox(
-                  width: 48,
-                  child: Text(
-                    'Radius',
-                    style: TextStyle(
-                      color: colors.mutedForeground,
-                      fontSize: 12,
+            if (logo.backgroundShape == BackgroundShape.rectangle)
+              Row(
+                children: [
+                  SizedBox(
+                    width: 48,
+                    child: Text(
+                      'Radius',
+                      style: TextStyle(
+                        color: colors.mutedForeground,
+                        fontSize: 12,
+                      ),
                     ),
                   ),
-                ),
-                Expanded(
-                  child: Slider(
-                    value: logo.exportBorderRadius,
-                    min: 0,
-                    max: 100,
-                    divisions: 20,
-                    onChanged: (v) => notifier.setExportBorderRadius(v),
+                  Expanded(
+                    child: Slider(
+                      value: logo.exportBorderRadius,
+                      min: 0,
+                      max: 100,
+                      divisions: 20,
+                      onChanged: (v) => notifier.setExportBorderRadius(v),
+                    ),
                   ),
-                ),
-                SizedBox(
-                  width: 36,
-                  child: Text(
-                    '${logo.exportBorderRadius.round()}',
-                    style: TextStyle(
-                      color: colors.mutedForeground,
+                  SizedBox(
+                    width: 36,
+                    child: Text(
+                      '${logo.exportBorderRadius.round()}',
+                      style: TextStyle(
+                        color: colors.mutedForeground,
                       fontSize: 11,
                     ),
                   ),
@@ -1385,6 +1462,7 @@ class _LogoPageState extends ConsumerState<LogoPage> {
         svgString: logo.svgString,
         borderRadius: logo.exportBorderRadius,
         transparentBg: logo.transparentBackground,
+        backgroundShape: logo.backgroundShape,
       );
 
       if (mounted) {
@@ -1433,6 +1511,7 @@ class _LogoPageState extends ConsumerState<LogoPage> {
         svgString: logo.svgString,
         borderRadius: logo.exportBorderRadius,
         transparentBg: logo.transparentBackground,
+        backgroundShape: logo.backgroundShape,
       );
 
       if (mounted) {

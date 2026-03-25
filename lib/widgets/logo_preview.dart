@@ -23,6 +23,7 @@ class LogoPreview extends StatelessWidget {
   final ImageFitMode imageFitMode;
   final bool transparentBackground;
   final double exportBorderRadius;
+  final BackgroundShape backgroundShape;
 
   const LogoPreview({
     super.key,
@@ -42,6 +43,7 @@ class LogoPreview extends StatelessWidget {
     this.imageFitMode = ImageFitMode.contain,
     this.transparentBackground = false,
     this.exportBorderRadius = 0.0,
+    this.backgroundShape = BackgroundShape.rectangle,
   });
 
   BoxFit _toBoxFit(ImageFitMode mode) {
@@ -180,7 +182,9 @@ class LogoPreview extends StatelessWidget {
           : _buildContent(),
     );
 
-    if (hasBorderRadius) {
+    if (backgroundShape == BackgroundShape.circle) {
+      innerContent = ClipOval(child: innerContent);
+    } else if (hasBorderRadius) {
       innerContent = ClipRRect(
         borderRadius: BorderRadius.circular(exportBorderRadius),
         child: innerContent,

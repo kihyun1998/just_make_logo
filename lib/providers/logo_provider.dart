@@ -158,6 +158,10 @@ class LogoNotifier extends _$LogoNotifier {
     state = state.copyWith(exportBorderRadius: radius.clamp(0, 100));
   }
 
+  void setBackgroundShape(BackgroundShape shape) {
+    state = state.copyWith(backgroundShape: shape);
+  }
+
   void setSvgString(String? svg) {
     state = state.copyWith(svgString: svg);
   }
